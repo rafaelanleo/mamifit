@@ -110,10 +110,6 @@
         .place-card { background:var(--surface); border-radius:18px; border:1px solid var(--border); overflow:hidden; }
         .place-header { padding:1.1rem 1.1rem 0.7rem; } .place-body { padding:0 1.1rem 1.1rem; }
 
-        .pottery-card { background:var(--surface); border-radius:18px; border:1px solid var(--border); overflow:hidden; }
-        .pottery-img { width:100%; height:200px; object-fit:cover; display:block; }
-        .pottery-body { padding:1.1rem; }
-
         @media (max-width:440px) {
             .card { padding:1.1rem; border-radius:16px; }
             .scroll-area { padding:1rem 0.85rem 7rem; gap:1.1rem; }
@@ -122,7 +118,6 @@
             .ex-card.open .ex-body { max-height:340px; } .ex-icon { width:36px; height:36px; }
             .menu-cell { padding:0.5rem 0.5rem; font-size:0.73rem; }
             .bnav-inner button { min-width:42px; font-size:0.5rem; } .bnav-inner button .ni { font-size:1rem; }
-            .pottery-img { height:160px; }
             #w-inp, #h-inp { font-size:0.8rem !important; padding:0.55rem 0.65rem !important; }
         }
     </style>
@@ -176,10 +171,7 @@
         <div class="grid grid-cols-3 gap-3 mt-3 text-center"><div><p class="text-2xl font-extrabold" id="imc-v" style="color:var(--primary)">--</p><p class="text-xs font-medium" style="color:var(--muted)">IMC</p></div><div><p class="text-2xl font-extrabold" id="imc-w" style="color:var(--warm)">--</p><p class="text-xs font-medium" style="color:var(--muted)">Peso</p></div><div><p class="text-2xl font-extrabold" id="imc-c" style="color:var(--soft);font-size:1rem">--</p><p class="text-xs font-medium" style="color:var(--muted)">Categoría</p></div></div>
         <p class="text-xs mt-2" style="color:var(--muted)" id="imc-date"></p>
     </div>
-    <div class="card">
-        <p class="label">Historial de peso</p>
-        <div id="whist" class="space-y-2 mt-2" style="max-height:240px;overflow-y:auto"></div>
-    </div>
+    <div class="card"><p class="label">Historial de peso</p><div id="whist" class="space-y-2 mt-2" style="max-height:240px;overflow-y:auto"></div></div>
     <div class="card text-center" style="background:var(--primary-soft)"><p class="font-semibold italic leading-relaxed" style="color:var(--primary)" id="quote"></p></div>
 </div></section>
 
@@ -226,9 +218,6 @@
 </div>
 
 <script>
-// ===== GLOBAL SCOPE FUNCTIONS (para onclick inline) =====
-
-// Funciones expuestas globalmente
 var navTo, retakeQuiz, quizNext, quizBack, so;
 var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd, selP, confirmP, saveWeight;
 
@@ -265,23 +254,23 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
     var MENUS = [[{d:'Lunes',D:'🥣 Porridge de avena con plátano',C:'🥗 Quinoa, aguacate y pollo',N:'🍲 Crema de calabaza'},{d:'Martes',D:'🥑 Tostada con aguacate y huevo',C:'🐟 Salmón al horno con brócoli',N:'🥬 Revuelto de espárragos'},{d:'Miércoles',D:'🍓 Yogur con granola y frutos rojos',C:'🍛 Pollo al curry con arroz integral',N:'🥣 Gazpacho con huevo duro'},{d:'Jueves',D:'🥞 Tortitas de avena y plátano',C:'🥙 Garbanzos, calabacín y menta',N:'🍆 Berenjena rellena de verduras'},{d:'Viernes',D:'🍌 Smoothie verde detox',C:'🍣 Wok de verduras y tofu',N:'🍕 Pizza con base de coliflor'},{d:'Sábado',D:'🥚 Revuelto de huevos con tomate',C:'🥩 Pollo a la plancha con ensalada',N:'🥗 Ensalada de lentejas'},{d:'Domingo',D:'🧇 Overnight oats de chía y cacao',C:'🥘 Lentejas estofadas',N:'🍵 Crema de zanahoria'}],[{d:'Lunes',D:'🍞 Tostada integral con tomate',C:'🥗 Ensalada de pasta con atún',N:'🥦 Brócoli gratinado'},{d:'Martes',D:'🥤 Batido de plátano y canela',C:'🍗 Muslos de pollo asados',N:'🥒 Crema de pepino'},{d:'Miércoles',D:'🍳 Tortilla con espinacas',C:'🐟 Merluza a la plancha',N:'🥬 Ensalada de garbanzos'},{d:'Jueves',D:'🥜 Tostada con crema de cacahuete',C:'🥙 Wrap de pavo y verduras',N:'🍜 Sopa de fideos'},{d:'Viernes',D:'🍎 Yogur con manzana asada',C:'🍣 Sushi bowl de salmón',N:'🥘 Tortilla de calabacín'},{d:'Sábado',D:'🥞 Crepes integrales con fruta',C:'🍔 Hamburguesa de pollo casera',N:'🥗 Ensalada caprese'},{d:'Domingo',D:'🥣 Porridge con frutos secos',C:'🥩 Ternera guisada',N:'🍵 Puré de verduras'}],[{d:'Lunes',D:'🍞 Pan integral con hummus',C:'🥗 Ensalada de arroz salvaje',N:'🥣 Sopa minestrone'},{d:'Martes',D:'🥚 Huevos revueltos con champiñones',C:'🐟 Sardinas a la plancha',N:'🥦 Coliflor al horno'},{d:'Miércoles',D:'🥣 Muesli con leche y fruta',C:'🍛 Lentejas al curry',N:'🥒 Crema de calabacín'},{d:'Jueves',D:'🍌 Yogur con plátano y nueces',C:'🍗 Pechuga de pollo rellena',N:'🥬 Ensalada de espinacas'},{d:'Viernes',D:'🥤 Smoothie de mango',C:'🍣 Bowl de arroz con salmón',N:'🥘 Revuelto de setas'},{d:'Sábado',D:'🥐 Tostada francesa integral',C:'🥙 Falafel con ensalada',N:'🍆 Pisto manchego'},{d:'Domingo',D:'🥞 Tortitas de calabaza',C:'🥘 Paella integral',N:'🍵 Crema de puerros'}],[{d:'Lunes',D:'🍞 Tostada con aguacate',C:'🥗 Ensalada tibia de patata',N:'🥣 Puré de calabacín'},{d:'Martes',D:'🥣 Gachas de avena con compota',C:'🐟 Bacalao al horno',N:'🥬 Tortilla de acelgas'},{d:'Miércoles',D:'🍳 Huevo poché con espárragos',C:'🍛 Garbanzos con espinacas',N:'🥒 Gazpacho verde'},{d:'Jueves',D:'🥜 Bowl de kéfir y granola',C:'🍗 Pollo teriyaki con arroz',N:'🍜 Sopa de miso'},{d:'Viernes',D:'🍞 Pan con tomate y jamón',C:'🥙 Ensalada de bulgur',N:'🍕 Mini pizzas de berenjena'},{d:'Sábado',D:'🥣 Smoothie bowl de frutos rojos',C:'🍔 Hamburguesa de lentejas',N:'🥗 Ensalada de pasta'},{d:'Domingo',D:'🥞 Panqueques de avena',C:'🥘 Arroz caldoso',N:'🥣 Crema de espárragos'}]];
 
     // MADRID DATA
-    var MADPLANS = [{name:'Teatro de Títeres del Retiro',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Funciones de títeres y marionetas al aire libre todos los findes. Los niños se sientan en el césped y alucinan. Un clásico que nunca falla.',tips:'Llega 15 min antes. Puerta de la Independencia. Lleva algo para sentarte.',horario:'Sábados y domingos 12:30'},{name:'Parque de El Capricho',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Uno de los jardines más bellos y desconocidos. Laberintos, grutas, estanques y un palacete. Solo abre fines de semana. Una joya secreta.',tips:'Solo findes y festivos. No pelotas ni bicis. Muy tranquilo. Lleva picnic.',horario:'Findes 9-21h'},{name:'Templo de Debod + picnic',zone:'Plaza España',price:'Gratis',age:'3-10 años',desc:'Templo egipcio de más de 2200 años en pleno centro. Los niños flipan. Jardines perfectos para picnic con las mejores vistas de Madrid.',tips:'Cola para entrar. Atardecer mágico. Mejor entre semana.',horario:'Mar-Dom 10-20h'},{name:'Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Almendros en flor (feb-mar), laberintos vegetales, estanques con patos. Espectáculo rosa en primavera. Parque secreto precioso.',tips:'Imprescindible en floración. Metro Suanzes L5.',horario:'Abierto todo el año'},{name:'Madrid Río: toboganes XXL',zone:'Arganzuela',price:'Gratis',age:'2-10 años',desc:'17 áreas de juego con toboganes gigantes, tirolinas y zona de agua. Kilómetros de parque junto al Manzanares.',tips:'Zona Puente del Rey = mejores toboganes. Lleva patinete.',horario:'Siempre abierto'},{name:'Cerro del Tío Pío',zone:'Vallecas',price:'Gratis',age:'2-10 años',desc:'Colinas verdes con las mejores vistas de Madrid. Para volar cometas, rodar por el césped y ver atardeceres brutales.',tips:'Al atardecer es increíble. Lleva cometa. Poca sombra.',horario:'Siempre abierto'},{name:'Cambio de Guardia Real',zone:'Centro',price:'Gratis',age:'4-10 años',desc:'Desfile de soldados con uniformes de época, caballos y música. Los niños se quedan con la boca abierta.',tips:'Miércoles y sábados 11h. Llega 20 min antes.',horario:'Miércoles y sábados'},{name:'Palacio de Cristal (Retiro)',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Palacio de cristal y hierro de 1887. Exposiciones de arte y patos en el estanque. Pura magia en medio del parque.',tips:'Entrada libre. Combínalo con paseo en barca.',horario:'Todos los días'},{name:'Parque Juan Carlos I',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Parque enorme sin masificar. Lago, olivos centenarios, esculturas. Ideal para bici o patinete sin aglomeraciones.',tips:'Alquiler de bicis en entrada. Día entero sin gente.',horario:'Siempre abierto'},{name:'Casa de Campo: lago y ardillas',zone:'Moncloa',price:'Gratis',age:'2-10 años',desc:'El parque más grande. Lago, merenderos y ardillas que comen de tu mano. Naturaleza pura a un metro de Gran Vía.',tips:'Lleva frutos secos sin sal. Merenderos tras pistas de tenis.',horario:'Siempre abierto'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres, teatro, títeres y cine los findes. Cafetería agradable y mucho espacio.',tips:'Consulta programación web. Metro Legazpi L3.',horario:'Findes'},{name:'Parque Felipe VI',zone:'Valdebebas',price:'Gratis',age:'3-10 años',desc:'Parque de aventura con toboganes metálicos gigantes, redes de escalada y tirolinas. Pura adrenalina para peques.',tips:'Mejor pantalón largo. Cercanías Valdebebas.',horario:'Siempre abierto'},{name:'Espacio Abierto Quinta Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres gratuitos, cuentacuentos y teatro. La Urbanoteca es un espacio de juego interior maravilloso.',tips:'Algunas actividades requieren inscripción.',horario:'Consultar web'},{name:'Jardín Botánico',zone:'Atocha',price:'4€ adultos, niños gratis',age:'3-10 años',desc:'5000+ especies de plantas. Invernaderos, bonsáis centenarios y talleres familiares los fines de semana.',tips:'Niños gratis. Talleres findes. Metro Atocha.',horario:'Mar-Dom'},{name:'Museo Ciencias Naturales',zone:'Chamberí',price:'Gratis dom 17-20h',age:'4-10 años',desc:'Dinosaurios, minerales, meteoritos. El museo favorito de los niños. Gratis los domingos por la tarde.',tips:'Gratis domingos 17-20h. Sala dinosaurios brutal.',horario:'Mar-Dom'}];
+    var MADPLANS = [{name:'Teatro de Títeres del Retiro',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Funciones de títeres y marionetas al aire libre todos los findes. Los niños se sientan en el césped y alucinan. Un clásico que nunca falla.',tips:'Llega 15 min antes. Puerta de la Independencia. Lleva algo para sentarte.',horario:'Sábados y domingos 12:30'},{name:'Parque de El Capricho',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Uno de los jardines más bellos y desconocidos. Laberintos, grutas, estanques y un palacete. Solo abre fines de semana. Una joya secreta.',tips:'Solo findes y festivos. No pelotas ni bicis. Muy tranquilo. Lleva picnic.',horario:'Findes 9-21h'},{name:'Templo de Debod + picnic',zone:'Plaza España',price:'Gratis',age:'3-10 años',desc:'Templo egipcio de más de 2200 años en pleno centro. Los niños flipan. Jardines perfectos para picnic con las mejores vistas de Madrid.',tips:'Cola para entrar. Atardecer mágico. Mejor entre semana.',horario:'Mar-Dom 10-20h'},{name:'Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Almendros en flor (feb-mar), laberintos vegetales, estanques con patos. Espectáculo rosa en primavera. Parque secreto precioso.',tips:'Imprescindible en floración. Metro Suanzes L5.',horario:'Abierto todo el año'},{name:'Madrid Río: toboganes XXL',zone:'Arganzuela',price:'Gratis',age:'2-10 años',desc:'17 áreas de juego con toboganes gigantes, tirolinas y zona de agua. Kilómetros de parque junto al Manzanares.',tips:'Zona Puente del Rey = mejores toboganes. Lleva patinete.',horario:'Siempre abierto'},{name:'Cerro del Tío Pío',zone:'Vallecas',price:'Gratis',age:'2-10 años',desc:'Colinas verdes con las mejores vistas de Madrid. Para volar cometas, rodar por el césped y ver atardeceres brutales.',tips:'Al atardecer es increíble. Lleva cometa. Poca sombra.',horario:'Siempre abierto'},{name:'Cambio de Guardia Real',zone:'Centro',price:'Gratis',age:'4-10 años',desc:'Desfile de soldados con uniformes de época, caballos y música. Los niños se quedan con la boca abierta.',tips:'Miércoles y sábados 11h. Llega 20 min antes.',horario:'Miércoles y sábados'},{name:'Palacio de Cristal (Retiro)',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Palacio de cristal y hierro de 1887. Exposiciones de arte y patos en el estanque. Pura magia en medio del parque.',tips:'Entrada libre. Combínalo con paseo en barca.',horario:'Todos los días'},{name:'Parque Juan Carlos I',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Parque enorme sin masificar. Lago, olivos centenarios, esculturas. Ideal para bici o patinete sin aglomeraciones.',tips:'Alquiler de bicis en entrada. Día entero sin gente.',horario:'Siempre abierto'},{name:'Casa de Campo: lago y ardillas',zone:'Moncloa',price:'Gratis',age:'2-10 años',desc:'El parque más grande. Lago, merenderos y ardillas que comen de tu mano. Naturaleza pura a un metro de Gran Vía.',tips:'Lleva frutos secos sin sal. Merenderos tras pistas de tenis.',horario:'Siempre abierto'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres, teatro, títeres y cine los findes. Cafetería agradable y mucho espacio.',tips:'Consulta programación web. Metro Legazpi L3.',horario:'Findes'},{name:'Parque Felipe VI',zone:'Valdebebas',price:'Gratis',age:'3-10 años',desc:'Parque de aventura con toboganes metálicos gigantes, redes de escalada y tirolinas. Pura adrenalina para peques.',tips:'Mejor pantalón largo. Cercanías Valdebebas.',horario:'Siempre abierto'},{name:'Jardín Botánico',zone:'Atocha',price:'4€ adultos, niños gratis',age:'3-10 años',desc:'5000+ especies de plantas. Invernaderos, bonsáis centenarios y talleres familiares los fines de semana.',tips:'Niños gratis. Talleres findes. Metro Atocha.',horario:'Mar-Dom'},{name:'Museo Ciencias Naturales',zone:'Chamberí',price:'Gratis dom 17-20h',age:'4-10 años',desc:'Dinosaurios, minerales, meteoritos. El museo favorito de los niños. Gratis los domingos por la tarde.',tips:'Gratis domingos 17-20h. Sala dinosaurios brutal.',horario:'Mar-Dom'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres gratuitos, cuentacuentos y teatro. La Urbanoteca es un espacio de juego interior maravilloso.',tips:'Algunas actividades requieren inscripción.',horario:'Consultar web'}];
 
     // POTTERY DATA
     var POTTERY = [
-    {name:'Jarrón orgánico asimétrico',desc:'Formas curvas trabajadas en torno. La belleza de lo irregular.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=540&fit=crop&auto=format&q=80'},
-    {name:'Cuencos apilables',desc:'Arcilla roja con esmalte interior crema. Del torno a tu mesa.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&h=300&fit=crop&auto=format&q=80'},
-    {name:'Taza esmalte cobalto',desc:'Azul profundo sobre arcilla clara. Cada pieza irrepetible.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=420&fit=crop&auto=format&q=80'},
-    {name:'Portavelas luna',desc:'Textura rugosa con esponja natural. Luz y sombra en una pieza.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=540&fit=crop&auto=format&q=80'},
-    {name:'Plato flora prensada',desc:'Flores silvestres prensadas. Huellas botánicas pintadas a mano.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=400&h=300&fit=crop&auto=format&q=80'},
-    {name:'Jarrón de dos tonos',desc:'Mitad mate, mitad pulido. La transición es poesía visual.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=400&h=420&fit=crop&auto=format&q=80'},
-    {name:'Cuenco con base',desc:'Exterior sin esmaltar, interior crema. Minimalismo puro.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=300&fit=crop&auto=format&q=80&crop=bottom'},
-    {name:'Taller de torno',desc:'El proceso es parte de la obra. Arcilla viva entre los dedos.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&h=540&fit=crop&auto=format&q=80&crop=top'},
-    {name:'Esmalte reactivo',desc:'El fuego decide el acabado final. Nunca dos iguales.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=300&fit=crop&auto=format&q=80&crop=top'},
-    {name:'Pieza de luz',desc:'La cerámica y la vela se potencian. Calidez en cada detalle.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=420&fit=crop&auto=format&q=80&crop=bottom'},
-    {name:'Textura natural',desc:'La arcilla guarda la huella de quien la trabaja.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=400&h=540&fit=crop&auto=format&q=80&crop=center'},
-    {name:'Forma y vacío',desc:'Lo que no está también forma parte de la pieza.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=400&h=300&fit=crop&auto=format&q=80&crop=bottom'}
-];
+        {name:'Jarrón orgánico asimétrico',desc:'Formas curvas trabajadas en torno. La belleza de lo irregular.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Cuencos apilables',desc:'Arcilla roja con esmalte interior crema. Del torno a tu mesa.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Taza esmalte cobalto',desc:'Azul profundo sobre arcilla clara. Cada pieza irrepetible.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Portavelas luna',desc:'Textura rugosa con esponja natural. Luz y sombra en una pieza.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Plato flora prensada',desc:'Flores silvestres prensadas. Huellas botánicas pintadas a mano.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Jarrón de dos tonos',desc:'Mitad mate, mitad pulido. La transición es poesía visual.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Cuenco con base',desc:'Exterior sin esmaltar, interior crema. Minimalismo puro.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=300&fit=crop&auto=format&q=80&crop=bottom'},
+        {name:'Taller de torno',desc:'El proceso es parte de la obra. Arcilla viva entre los dedos.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&h=540&fit=crop&auto=format&q=80&crop=top'},
+        {name:'Esmalte reactivo',desc:'El fuego decide el acabado final. Nunca dos iguales.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=300&fit=crop&auto=format&q=80&crop=top'},
+        {name:'Pieza de luz',desc:'La cerámica y la vela se potencian. Calidez en cada detalle.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=420&fit=crop&auto=format&q=80&crop=bottom'},
+        {name:'Textura natural',desc:'La arcilla guarda la huella de quien la trabaja.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=400&h=540&fit=crop&auto=format&q=80&crop=center'},
+        {name:'Forma y vacío',desc:'Lo que no está también forma parte de la pieza.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=400&h=300&fit=crop&auto=format&q=80&crop=bottom'}
+    ];
 
     function getMenu(){return MENUS[weekNum()%MENUS.length];}
     function getPlans(){return shuffle(MADPLANS,seedFromDate('mp'+weekNum())+33).slice(0,5);}
@@ -292,6 +281,18 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
         var s = pSeed || seedFromDate('pt'+weekNum())+99;
         return shuffle(POTTERY,s).slice(0,8);
     }
+
+    function renderMenu(){
+        var m=getMenu();
+        document.getElementById('menu-week-label').textContent='Semana '+(weekNum()%MENUS.length+1)+' de '+MENUS.length;
+        document.getElementById('menu-container').innerHTML=m.map(function(day,i){return'<div class="menu-day a-up" style="animation-delay:'+(i*0.04)+'s"><div class="menu-day-header" style="background:var(--primary-soft);color:var(--primary)">'+day.d+'</div><div class="menu-row"><div class="menu-cell"><p class="text-xs font-semibold">🌅</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.D+'</p></div><div class="menu-cell"><p class="text-xs font-semibold">☀️</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.C+'</p></div><div class="menu-cell"><p class="text-xs font-semibold">🌙</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.N+'</p></div></div></div>';}).join('');
+    }
+
+    function renderPlans(){
+        var p=getPlans();
+        document.getElementById('plans-container').innerHTML=p.map(function(x,i){return'<div class="place-card a-up" style="animation-delay:'+(i*0.05)+'s"><div class="place-header"><div class="flex items-center justify-between flex-wrap gap-2 mb-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:'+(x.price==='Gratis'?'#ecfdf5':'#fef9ef')+';color:'+(x.price==='Gratis'?'#059669':'#d97706')+'">'+x.price+'</span><span class="text-xs" style="color:var(--muted)">👶 '+x.age+'</span></div><h3 class="font-extrabold text-lg">'+x.name+'</h3><div class="flex flex-wrap gap-2 mt-1"><span class="text-xs" style="color:var(--muted)">📍 '+x.zone+'</span><span class="text-xs" style="color:var(--muted)">🕐 '+x.horario+'</span></div></div><div class="place-body"><p class="text-sm mb-3" style="color:var(--soft)">'+x.desc+'</p><div style="background:#eff6ff;border-radius:12px;padding:0.7rem 1rem"><p class="text-xs" style="color:#2563eb"><strong>💡</strong> '+x.tips+'</p></div></div></div>';}).join('');
+    }
+
     function renderPottery(force){
         var pt = getPottery(force);
         var boards = [
@@ -422,61 +423,52 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
 
     // ===== WEIGHT & IMC =====
     saveWeight = function(){
-        var wInput = document.getElementById('w-inp');
-        var hInput = document.getElementById('h-inp');
-        var w = parseFloat(wInput.value);
-        var h = parseFloat(hInput.value);
-        if(!w || w<30 || w>250 || !h || h<100 || h>250){alert('Introduce peso (kg) y altura (cm) válidos.');return;}
-        var entry = {date: td(), weight: w, height: h};
+        var wInput=document.getElementById('w-inp');
+        var hInput=document.getElementById('h-inp');
+        var w=parseFloat(wInput.value);
+        var h=parseFloat(hInput.value);
+        if(!w||w<30||w>250||!h||h<100||h>250){alert('Introduce peso (kg) y altura (cm) válidos.');return;}
+        var entry={date:td(),weight:w,height:h};
         S.weightLog.push(entry);
-        if(S.weightLog.length > 52) S.weightLog = S.weightLog.slice(-52);
+        if(S.weightLog.length>52)S.weightLog=S.weightLog.slice(-52);
         sv('weight',S.weightLog);
-        wInput.value=''; hInput.value='';
+        wInput.value='';hInput.value='';
         renderWeightUI();
         confetti();
     };
-    window.saveWeight = saveWeight;
 
     function renderWeightUI(){
-        var log = S.weightLog;
-        // Latest
-        if(log.length > 0){
-            var last = log[log.length-1];
-            var imc = last.weight / ((last.height/100)*(last.height/100));
-            document.getElementById('imc-v').textContent = imc.toFixed(1);
-            document.getElementById('imc-w').textContent = last.weight + ' kg';
-            var cat='', catCol='var(--soft)';
+        var log=S.weightLog;
+        if(log.length>0){
+            var last=log[log.length-1];
+            var imc=last.weight/((last.height/100)*(last.height/100));
+            document.getElementById('imc-v').textContent=imc.toFixed(1);
+            document.getElementById('imc-w').textContent=last.weight+' kg';
+            var cat='',catCol='var(--soft)';
             if(imc<18.5){cat='Bajo peso';catCol='#f59e0b';}
             else if(imc<25){cat='Saludable';catCol='#10b981';}
             else if(imc<30){cat='Sobrepeso';catCol='#f59e0b';}
             else{cat='Obesidad';catCol='#ef4444';}
-            document.getElementById('imc-c').textContent = cat;
-            document.getElementById('imc-c').style.color = catCol;
-            document.getElementById('imc-date').textContent = 'Último registro: '+last.date;
-            document.getElementById('h-inp').value = last.height;
+            document.getElementById('imc-c').textContent=cat;
+            document.getElementById('imc-c').style.color=catCol;
+            document.getElementById('imc-date').textContent='Último registro: '+last.date;
+            document.getElementById('h-inp').value=last.height;
         }
-        // History
-        var histHtml = '';
-        var recent = log.slice().reverse().slice(0,12);
-        var maxW = 0, minW = Infinity;
+        var histHtml='';
+        var recent=log.slice().reverse().slice(0,12);
+        var maxW=0,minW=Infinity;
         recent.forEach(function(e){if(e.weight>maxW)maxW=e.weight;if(e.weight<minW)minW=e.weight;});
-        var range = maxW-minW || 1;
+        var range=maxW-minW||1;
         recent.forEach(function(e,i){
-            var barW = ((e.weight-minW)/range)*100;
-            var arrow = '';
-            if(i<recent.length-1){
-                var prev = recent[i+1].weight;
-                if(e.weight<prev)arrow=' ↓';
-                else if(e.weight>prev)arrow=' ↑';
-                else arrow=' →';
-            }
-            var imcE = e.weight/((e.height/100)*(e.height/100));
-            var dotCol = imcE<25?'#10b981':imcE<30?'#f59e0b':'#ef4444';
-            histHtml += '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem"><span style="color:var(--muted);width:70px;text-align:right;flex-shrink:0">'+e.date.slice(5)+'</span><div style="flex:1;height:22px;background:#f5f0ff;border-radius:11px;overflow:hidden;position:relative"><div style="height:100%;width:'+barW+'%;background:'+dotCol+';border-radius:11px;opacity:0.5;transition:width 0.5s"></div><span style="position:absolute;left:8px;top:1px;font-size:0.7rem;font-weight:700;color:var(--ink)">'+e.weight+' kg</span></div><span style="color:var(--muted);width:24px;text-align:center">'+arrow+'</span></div>';
+            var barW=((e.weight-minW)/range)*100;
+            var arrow='';
+            if(i<recent.length-1){var prev=recent[i+1].weight;if(e.weight<prev)arrow=' ↓';else if(e.weight>prev)arrow=' ↑';else arrow=' →';}
+            var imcE=e.weight/((e.height/100)*(e.height/100));
+            var dotCol=imcE<25?'#10b981':imcE<30?'#f59e0b':'#ef4444';
+            histHtml+='<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem"><span style="color:var(--muted);width:70px;text-align:right;flex-shrink:0">'+e.date.slice(5)+'</span><div style="flex:1;height:22px;background:#f5f0ff;border-radius:11px;overflow:hidden;position:relative"><div style="height:100%;width:'+barW+'%;background:'+dotCol+';border-radius:11px;opacity:0.5;transition:width 0.5s"></div><span style="position:absolute;left:8px;top:1px;font-size:0.7rem;font-weight:700;color:var(--ink)">'+e.weight+' kg</span></div><span style="color:var(--muted);width:24px;text-align:center">'+arrow+'</span></div>';
         });
-        document.getElementById('whist').innerHTML = histHtml || '<p class="text-xs" style="color:var(--muted)">Aún no has registrado ningún peso.</p>';
+        document.getElementById('whist').innerHTML=histHtml||'<p class="text-xs" style="color:var(--muted)">Aún no has registrado ningún peso.</p>';
     }
-    window.saveWeight = saveWeight;
 
     // ===== QUIZ =====
     var QUIZ = [
