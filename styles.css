@@ -1,0 +1,26 @@
+:root { --bg:#fff9fb; --card:#fff; --text:#2d2430; --muted:#6b5a6f; --brand:#b03a87; --brand-2:#f8c7e1; --ok:#2a8f5a; }
+* { box-sizing: border-box; }
+body { margin:0; font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); }
+.container { width:min(980px,92vw); margin:0 auto; }
+.hero { background:linear-gradient(135deg,#ffe9f5,#ffd7ed); padding:3rem 0; border-bottom:1px solid #f5cde3; }
+.badge { display:inline-block; background:var(--card); border:1px solid #f0bfdc; padding:.25rem .7rem; border-radius:999px; color:var(--muted); font-size:.85rem; }
+h1 { font-size:clamp(2rem,5vw,3rem); margin:.6rem 0; }
+.subtitle { max-width:65ch; color:var(--muted); }
+.card { background:var(--card); border:1px solid #f0e4eb; border-radius:14px; padding:1rem 1.1rem; box-shadow:0 6px 20px rgba(176,58,135,.08); margin:1rem 0; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
+ol li, ul li { margin:.45rem 0; }
+button { border:0; border-radius:10px; padding:.7rem 1rem; font-weight:600; cursor:pointer; }
+.btn-primary { background:var(--brand); color:#fff; }
+.btn-secondary { background:var(--brand-2); color:#5a2144; }
+.actions { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:.8rem; }
+.muted { color:var(--muted); }
+.footer { padding:2rem 0 3rem; color:var(--muted); text-align:center; }
+strong.ok { color:var(--ok); }
+.calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:.4rem; margin-top:.5rem; }
+.day { text-align:center; padding:.5rem .2rem; border-radius:8px; background:#f4edf2; color:#7a687d; font-weight:600; }
+.day.active { background:#e7ffe8; color:#146b3c; border:1px solid #a6dfb2; }
+.tier-card strong { color:#7c145a; }
+.ceramics-list { display:grid; gap:.6rem; margin-top:.8rem; }
+.ceramic-item { border:1px solid #edddea; border-radius:10px; padding:.7rem; background:#fff; }
+.ceramic-item a { color:#7c145a; font-weight:600; text-decoration:none; }
+.ceramic-meta { font-size:.85rem; color:var(--muted); margin-top:.2rem; }
