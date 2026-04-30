@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MamiFit · 20 minutos para sentirte fuerte</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container">
+        <p class="badge">Entrena en casa · 20 min</p>
+        <h1>MamiFit</h1>
+        <p class="subtitle">
+          Rutinas funcionales y calistenia suave para mujeres de alrededor de 40 años. Entrena sola o con peques, sin presión y con resultados reales.
+        </p>
+        <div class="actions">
+          <button id="startNow" class="btn-primary">Empezar rutina de hoy</button>
+          <button id="startTimer" class="btn-secondary">Iniciar temporizador</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card tier-card">
+        <h2>Planes</h2>
+        <p class="muted">El plan premium se llama <strong>MamiGorda</strong>: una etapa con más acompañamiento para llegar a tu mejor versión MamiFit.</p>
+        <div class="actions">
+          <button class="btn-primary" id="tierBasic">Plan MamiFit</button>
+          <button class="btn-secondary" id="tierPremium">Plan MamiGorda (premium)</button>
+        </div>
+        <p id="tierText" class="muted"></p>
+      </section>
+
+      <section class="card" id="today-session">
+        <h2>Tu sesión de hoy (20 min)</h2>
+        <div id="sessionMeta" class="muted"></div>
+        <p>Tiempo restante: <strong id="timer">20:00</strong></p>
+        <ol id="routineList"></ol>
+        <div class="actions">
+          <button id="nextRoutine" class="btn-secondary">Quiero otra rutina</button>
+          <button id="toggleKids" class="btn-secondary">Modo con peques: OFF</button>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h3>Elige nivel</h3>
+          <div class="actions">
+            <button class="btn-secondary level-btn" data-level="Base">Base</button>
+            <button class="btn-secondary level-btn" data-level="Intermedio">Intermedio</button>
+            <button class="btn-secondary level-btn" data-level="Recuperación">Día suave</button>
+          </div>
+          <p id="levelInfo" class="muted"></p>
+        </article>
+
+        <article class="card">
+          <h3>Tu progreso</h3>
+          <p>Sesiones completadas: <strong id="sessionsDone">0</strong></p>
+          <p>Racha actual: <strong id="streak">0</strong> días</p>
+          <button id="complete" class="btn-primary">Marcar sesión como hecha ✅</button>
+        </article>
+
+        <article class="card">
+          <h3>Calendario semanal</h3>
+          <div id="calendar" class="calendar"></div>
+        </article>
+
+        <article class="card">
+          <h3>Cerámica aesthetic (inspiración)</h3>
+          <p class="muted">Selección aleatoria de pines de tus tableros de Pinterest.</p>
+          <div class="actions">
+            <button id="refreshCeramics" class="btn-secondary">Ver otra selección</button>
+          </div>
+          <div id="ceramicsList" class="ceramics-list"></div>
+        </article>
+
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <p>Hecho con cariño para mujeres reales, con vidas reales 💜</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
