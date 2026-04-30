@@ -1,87 +1,507 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MamiFit · 20 minutos para sentirte fuerte</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header class="hero">
-      <div class="container">
-        <p class="badge">Entrena en casa · 20 min</p>
-        <h1>MamiFit</h1>
-        <p class="subtitle">
-          Rutinas funcionales y calistenia suave para mujeres de alrededor de 40 años. Entrena sola o con peques, sin presión y con resultados reales.
-        </p>
-        <div class="actions">
-          <button id="startNow" class="btn-primary">Empezar rutina de hoy</button>
-          <button id="startTimer" class="btn-secondary">Iniciar temporizador</button>
-        </div>
-      </div>
-    </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MamiFit · Entrena, come, crea, vive</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbff; --surface: #ffffff; --border: #f0eaf4; --ink: #1a1025;
+            --soft: #4a3f55; --muted: #9489a0; --primary: #7c3aed;
+            --primary-light: #ede9fe; --primary-soft: #f5f0ff;
+            --accent: #f472b6; --warm: #f59e0b; --success: #10b981;
+            --radius: 22px; --radius-sm: 14px; --gap: 1.4rem;
+            --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font); background: linear-gradient(180deg, #faf7ff 0%, #fdfbff 30%, #fefdfe 100%); color: var(--ink); min-height: 100dvh; -webkit-tap-highlight-color: transparent; line-height: 1.5; font-weight: 400; display: flex; flex-direction: column; align-items: center; }
+        ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #d8d0e0; border-radius: 3px; }
 
-    <main class="container">
-      <section class="card tier-card">
-        <h2>Planes</h2>
-        <p class="muted">El plan premium se llama <strong>MamiGorda</strong>: una etapa con más acompañamiento para llegar a tu mejor versión MamiFit.</p>
-        <div class="actions">
-          <button class="btn-primary" id="tierBasic">Plan MamiFit</button>
-          <button class="btn-secondary" id="tierPremium">Plan MamiGorda (premium)</button>
-        </div>
-        <p id="tierText" class="muted"></p>
-      </section>
+        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.12)}50%{box-shadow:0 0 0 18px rgba(124,58,237,0)}}
+        @keyframes confetti { 0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-150px) rotate(600deg) scale(0.2)}}
+        .a-up { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
 
-      <section class="card" id="today-session">
-        <h2>Tu sesión de hoy (20 min)</h2>
-        <div id="sessionMeta" class="muted"></div>
-        <p>Tiempo restante: <strong id="timer">20:00</strong></p>
-        <ol id="routineList"></ol>
-        <div class="actions">
-          <button id="nextRoutine" class="btn-secondary">Quiero otra rutina</button>
-          <button id="toggleKids" class="btn-secondary">Modo con peques: OFF</button>
-        </div>
-      </section>
+        .app-shell { width:100%; max-width:440px; flex:1; display:flex; flex-direction:column; }
+        .scroll-area { flex:1; padding:1.3rem 1rem 7rem; display:flex; flex-direction:column; gap:var(--gap); overflow-y:auto; }
 
-      <section class="grid">
-        <article class="card">
-          <h3>Elige nivel</h3>
-          <div class="actions">
-            <button class="btn-secondary level-btn" data-level="Base">Base</button>
-            <button class="btn-secondary level-btn" data-level="Intermedio">Intermedio</button>
-            <button class="btn-secondary level-btn" data-level="Recuperación">Día suave</button>
-          </div>
-          <p id="levelInfo" class="muted"></p>
-        </article>
+        .card { background:var(--surface); border-radius:20px; padding:1.3rem; border:1px solid var(--border); box-shadow:0 2px 12px rgba(124,58,237,0.04); }
+        .btn { font-family:var(--font); font-weight:600; padding:0.9rem 1.6rem; border-radius:50px; border:none; cursor:pointer; font-size:0.93rem; transition:all 0.2s; letter-spacing:-0.01em; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; white-space:nowrap; width:100%; }
+        .btn-primary { background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; box-shadow:0 6px 20px rgba(124,58,237,0.25); }
+        .btn-primary:hover { transform:translateY(-2px); }
+        .btn-primary:active { transform:scale(0.97); }
+        .btn-outline { background:var(--surface); color:var(--ink); border:1.5px solid var(--border); }
+        .btn-outline:hover { border-color:var(--primary); background:var(--primary-soft); }
+        .btn-ghost { background:none; color:var(--muted); border:none; padding:0.4rem; font-size:0.84rem; cursor:pointer; font-family:var(--font); font-weight:500; width:auto; }
+        .btn-ghost:hover { color:var(--primary); }
 
-        <article class="card">
-          <h3>Tu progreso</h3>
-          <p>Sesiones completadas: <strong id="sessionsDone">0</strong></p>
-          <p>Racha actual: <strong id="streak">0</strong> días</p>
-          <button id="complete" class="btn-primary">Marcar sesión como hecha ✅</button>
-        </article>
+        .toggle { width:48px; height:27px; background:#e4dcec; border-radius:27px; cursor:pointer; transition:all 0.3s; position:relative; flex-shrink:0; }
+        .toggle.on { background:var(--success); }
+        .toggle .knob { width:21px; height:21px; background:#fff; border-radius:50%; position:absolute; top:3px; left:3px; transition:0.3s; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+        .toggle.on .knob { left:24px; }
 
-        <article class="card">
-          <h3>Calendario semanal</h3>
-          <div id="calendar" class="calendar"></div>
-        </article>
+        .chip { padding:0.5rem 1.1rem; border-radius:50px; font-weight:600; font-size:0.82rem; cursor:pointer; border:1.5px solid var(--border); background:var(--surface); transition:all 0.2s; font-family:var(--font); white-space:nowrap; color:var(--muted); }
+        .chip:hover { border-color:var(--primary); color:var(--primary); }
+        .chip.active { background:var(--primary); color:#fff; border-color:var(--primary); }
 
-        <article class="card">
-          <h3>Cerámica aesthetic (inspiración)</h3>
-          <p class="muted">Selección aleatoria de pines de tus tableros de Pinterest.</p>
-          <div class="actions">
-            <button id="refreshCeramics" class="btn-secondary">Ver otra selección</button>
-          </div>
-          <div id="ceramicsList" class="ceramics-list"></div>
-        </article>
+        .ex-card { background:var(--surface); border-radius:16px; border:1px solid var(--border); overflow:hidden; transition:all 0.2s; }
+        .ex-card:hover { border-color:#d8d0e0; }
+        .ex-card.open { border-color:var(--primary); box-shadow:0 4px 16px rgba(124,58,237,0.08); }
+        .ex-head { display:flex; align-items:center; gap:0.65rem; padding:0.8rem 0.9rem; cursor:pointer; user-select:none; transition:background 0.12s; }
+        .ex-head:active { background:var(--primary-soft); }
+        .ex-icon { width:40px; height:40px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.2rem; background:var(--primary-soft); }
+        .ex-num { font-weight:700; font-size:0.75rem; color:var(--primary); width:22px; text-align:center; flex-shrink:0; }
+        .ex-info { flex:1; min-width:0; }
+        .ex-reps { font-weight:700; font-size:0.78rem; color:var(--accent); flex-shrink:0; white-space:nowrap; }
+        .ex-chev { font-size:0.45rem; color:#c4b8d0; transition:0.3s; flex-shrink:0; }
+        .ex-card.open .ex-chev { transform:rotate(180deg); color:var(--primary); }
+        .ex-check { width:24px; height:24px; border-radius:50%; border:2px solid #e4dcec; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; transition:all 0.2s; font-size:0.55rem; color:transparent; }
+        .ex-check.done { background:var(--success); border-color:var(--success); color:#fff; }
+        .ex-body { max-height:0; overflow:hidden; transition:max-height 0.4s cubic-bezier(0.16,1,0.3,1); border-top:1px solid transparent; }
+        .ex-card.open .ex-body { max-height:380px; border-color:var(--border); }
+        .ex-vid { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin:0.5rem 0.9rem; border-radius:10px; background:#0f0a1a; }
+        .ex-vid iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:10px; }
+        .ex-tip { padding:0.1rem 0.9rem 0.8rem; font-size:0.78rem; color:var(--soft); line-height:1.5; }
 
-      </section>
-    </main>
+        .prog-track { height:4px; background:#ede4f5; border-radius:4px; overflow:hidden; }
+        .prog-track .fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:4px; transition:width 0.5s cubic-bezier(0.16,1,0.3,1); }
 
-    <footer class="container footer">
-      <p>Hecho con cariño para mujeres reales, con vidas reales 💜</p>
-    </footer>
+        .timer-ring { width:155px; height:155px; border-radius:50%; border:4px solid #ede4f5; display:flex; align-items:center; justify-content:center; margin:0 auto; transition:border-color 0.5s; background:radial-gradient(circle,#fdfbff 60%,#f5f0ff 100%); }
+        .timer-ring .tnum { font-size:2.1rem; font-weight:700; letter-spacing:-0.03em; color:var(--ink); }
+        .timer-ring.running { border-color:var(--primary); animation:breathe 2s infinite; }
+        .timer-ring.done { border-color:var(--success); background:radial-gradient(circle,#fdfbff 60%,#ecfdf5 100%); }
+        .timer-ring.done .tnum { color:var(--success); font-size:1rem; }
 
-    <script src="app.js"></script>
-  </body>
+        .dday { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:0.75rem; background:#f5f0ff; color:#b8a8cc; }
+        .dday.filled { background:linear-gradient(135deg,var(--primary),#a855f7); color:#fff; }
+        .dday.today { box-shadow:0 0 0 2.5px var(--accent); }
+
+        .confetti-piece { position:fixed; width:7px; height:7px; border-radius:2px; animation:confetti 1s ease-out forwards; pointer-events:none; z-index:999; }
+        .screen { display:none; }
+        .screen.active { display:block; }
+
+        .plan-card { border:2px solid var(--border); border-radius:20px; padding:1.3rem; cursor:pointer; transition:all 0.25s; position:relative; background:var(--surface); }
+        .plan-card:hover { border-color:#d8d0e0; }
+        .plan-card.selected { border-color:var(--primary); background:var(--primary-soft); }
+        .plan-badge { position:absolute; top:-10px; right:18px; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#5c3d0e; font-weight:700; padding:0.2rem 0.8rem; border-radius:50px; font-size:0.68rem; }
+
+        .bnav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:440px; background:var(--surface); border-top:1px solid var(--border); z-index:50; padding:0.3rem 0.3rem calc(0.3rem + env(safe-area-inset-bottom, 0px)); box-shadow:0 -4px 20px rgba(124,58,237,0.06); }
+        .bnav-inner { display:flex; justify-content:space-around; align-items:flex-end; }
+        .bnav-inner button { display:flex; flex-direction:column; align-items:center; gap:0.15rem; cursor:pointer; background:none; border:none; font-family:var(--font); font-size:0.56rem; font-weight:600; color:var(--muted); transition:all 0.2s; padding:0.3rem 0.2rem; border-radius:12px; min-width:48px; -webkit-tap-highlight-color:transparent; }
+        .bnav-inner button .ni { font-size:1.15rem; transition:0.2s; line-height:1; }
+        .bnav-inner button.nav-active { color:var(--primary); }
+        .bnav-inner button.nav-active .ni { transform:translateY(-2px); }
+
+        .quiz-option { background:var(--surface); border:2px solid var(--border); border-radius:16px; padding:0.9rem 1.1rem; cursor:pointer; transition:all 0.2s; text-align:left; font-family:var(--font); font-size:0.9rem; font-weight:500; color:var(--ink); width:100%; }
+        .quiz-option:hover { border-color:#d8d0e0; }
+        .quiz-option.selected { border-color:var(--primary); background:var(--primary-soft); color:var(--primary); font-weight:600; }
+        .step-dot { width:8px; height:8px; border-radius:50%; background:#e4dcec; transition:all 0.3s; }
+        .step-dot.done { background:var(--primary); } .step-dot.current { background:var(--accent); transform:scale(1.4); }
+        .label { font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); }
+
+        .menu-day { background:var(--surface); border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+        .menu-day-header { padding:0.7rem 1rem; font-weight:700; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; }
+        .menu-row { display:flex; border-top:1px solid var(--border); }
+        .menu-cell { flex:1; padding:0.6rem 0.7rem; } .menu-cell + .menu-cell { border-left:1px solid var(--border); }
+
+        .place-card { background:var(--surface); border-radius:18px; border:1px solid var(--border); overflow:hidden; }
+        .place-header { padding:1.1rem 1.1rem 0.7rem; } .place-body { padding:0 1.1rem 1.1rem; }
+
+        .pottery-card { background:var(--surface); border-radius:18px; border:1px solid var(--border); overflow:hidden; }
+        .pottery-img { width:100%; height:200px; object-fit:cover; display:block; }
+        .pottery-body { padding:1.1rem; }
+
+        @media (max-width:440px) {
+            .card { padding:1.1rem; border-radius:16px; }
+            .scroll-area { padding:1rem 0.85rem 7rem; gap:1.1rem; }
+            .timer-ring { width:135px; height:135px; } .timer-ring .tnum { font-size:1.8rem; }
+            .dday { width:30px; height:30px; font-size:0.7rem; }
+            .ex-card.open .ex-body { max-height:340px; } .ex-icon { width:36px; height:36px; }
+            .menu-cell { padding:0.5rem 0.5rem; font-size:0.73rem; }
+            .bnav-inner button { min-width:42px; font-size:0.5rem; } .bnav-inner button .ni { font-size:1rem; }
+            .pottery-img { height:160px; }
+            #w-inp, #h-inp { font-size:0.8rem !important; padding:0.55rem 0.65rem !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+
+<section id="screen-onboard" class="screen"><div class="scroll-area">
+    <div style="height:3px;background:#ede4f5;border-radius:3px;overflow:hidden"><div id="ob-prog" style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0%;transition:width 0.4s"></div></div>
+    <div class="flex justify-center gap-1.5 mb-3" id="ob-steps"></div>
+    <div id="ob-question" class="a-up" style="flex:1"></div>
+    <div class="flex gap-3 mt-2"><button class="btn btn-ghost" id="ob-back" style="display:none" onclick="quizBack()">← Atrás</button><button class="btn btn-primary" id="ob-next" onclick="quizNext()">Continuar →</button></div>
+</div></section>
+
+<section id="screen-home" class="screen active"><div class="scroll-area">
+    <div class="a-up"><div style="background:linear-gradient(145deg,#7c3aed,#a855f7,#c084fc,#f472b6);border-radius:24px;padding:2rem 1.5rem;text-align:center;color:#fff;position:relative;overflow:hidden"><div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08)"></div><div style="position:absolute;bottom:-40px;left:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06)"></div><div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style="background:rgba(255,255,255,0.2)"><span class="text-3xl">🐷</span></div><h1 class="text-3xl font-extrabold tracking-tight mb-1">MamiFit</h1><p class="text-sm opacity-80 font-medium">Entrena · Come · Crea · Vive</p></div></div>
+    <p class="text-2xl font-bold leading-snug a-up" style="animation-delay:0.03s">No necesitas más tiempo.<br><span style="background:linear-gradient(135deg,#7c3aed,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Necesitas constancia.</span></p>
+    <div class="card a-up" style="animation-delay:0.05s"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><span class="text-xl" id="plan-ico">🐷</span><div><p class="label">Plan activo</p><p class="font-bold" id="plan-nm">MamiFit</p></div></div><button class="btn btn-outline text-sm" style="width:auto;padding:0.4rem 0.9rem" onclick="navTo('screen-plans')">Cambiar</button></div></div>
+    <div class="grid grid-cols-2 gap-3 a-up" style="animation-delay:0.07s"><div class="card text-center"><p class="text-3xl font-extrabold" id="sess-n" style="background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</p><p class="text-xs font-medium mt-0.5" style="color:var(--muted)">Sesiones</p></div><div class="card text-center"><p class="text-3xl font-extrabold" id="strk-n" style="color:#f59e0b">0</p><p class="text-xs font-medium mt-0.5" style="color:var(--muted)">Días de racha</p></div></div>
+    <div class="card a-up" style="animation-delay:0.09s"><p class="label">Esta semana</p><div class="flex justify-between mt-2" id="cal-mini"></div></div>
+    <button class="btn btn-primary text-base py-3.5 a-up" style="animation-delay:0.11s" onclick="navTo('screen-routine')">Empezar rutina de hoy →</button>
+    <div class="grid grid-cols-2 gap-3 a-up" style="animation-delay:0.12s">
+        <div class="card" onclick="navTo('screen-nutrition')" style="cursor:pointer;background:linear-gradient(135deg,#fef9ef,#fffdf5)"><p class="text-2xl mb-1">🥗</p><p class="font-bold text-sm">Menú semanal</p><p class="text-xs" style="color:var(--muted)">Plan completo</p></div>
+        <div class="card" onclick="navTo('screen-madrid')" style="cursor:pointer;background:linear-gradient(135deg,#eff6ff,#f5f9ff)"><p class="text-2xl mb-1">🗺️</p><p class="font-bold text-sm">Madrid Secreto</p><p class="text-xs" style="color:var(--muted)">Finde con peques</p></div>
+    </div>
+    <div class="card a-up" style="animation-delay:0.14s;cursor:pointer;background:linear-gradient(135deg,#fef5f0,#fdf2ec)" onclick="navTo('screen-pottery')"><div class="flex items-center gap-3"><p class="text-2xl">🏺</p><div><p class="font-bold text-sm">Cerámica Aesthetic</p><p class="text-xs" style="color:var(--muted)">Inspiración de taller</p></div></div></div>
+    <button class="btn btn-ghost a-up" style="animation-delay:0.16s;margin-top:-0.3rem" onclick="retakeQuiz()">🔄 Rehacer test inicial</button>
+</div></section>
+
+<section id="screen-routine" class="screen"><div class="scroll-area">
+    <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
+    <div class="card"><div class="flex items-center justify-between flex-wrap gap-2"><div><h2 class="text-xl font-extrabold" id="rnm">Rutina de hoy</h2><span class="inline-block mt-1.5 px-3 py-0.5 rounded-full text-xs font-bold text-white" id="rbadge">Base</span></div><span class="text-sm font-medium" style="color:var(--muted)">⏱ 20 min</span></div></div>
+    <div class="card flex items-center justify-between"><div><p class="font-semibold text-sm">👶 Modo con peques</p><p class="text-xs" style="color:var(--muted)">Añade un bloque lúdico</p></div><div class="toggle" id="kidstg" onclick="toggleKids()"><div class="knob"></div></div></div>
+    <div class="flex flex-wrap gap-2" id="chips"><button class="chip active" data-lvl="base" onclick="setLvl('base',this)">Base</button><button class="chip" data-lvl="intermedio" onclick="setLvl('intermedio',this)">Intermedio</button><button class="chip" data-lvl="suave" onclick="setLvl('suave',this)">Día suave</button></div>
+    <div class="flex items-center justify-between"><p class="label">Progreso</p><p class="text-xs font-medium" style="color:var(--muted)"><span id="dn">0</span>/<span id="tn">0</span></p></div>
+    <div class="prog-track"><div class="fill" id="progf" style="width:0%"></div></div>
+    <div class="card" id="exb"><p class="label">Ejercicios</p><div class="space-y-2 mt-2" id="bcont"></div></div>
+    <div class="card text-center"><p class="label">Temporizador</p><div class="timer-ring mt-3" id="timer"><span class="tnum">20:00</span></div><div class="mt-4 flex gap-3 justify-center"><button class="btn btn-primary" style="width:auto" id="tbtn" onclick="toggleTimer()">▶ Iniciar</button><button class="btn btn-outline text-sm" style="width:auto" onclick="resetTimer()">↺ Reiniciar</button></div></div>
+    <button class="btn btn-outline" onclick="newR()">🔄 Quiero otra rutina</button>
+    <button class="btn btn-primary" id="doneb" style="display:none" onclick="complete()">✓ Completar rutina</button>
+</div></section>
+
+<section id="screen-progress" class="screen"><div class="scroll-area">
+    <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
+    <h2 class="text-2xl font-extrabold">Tu progreso</h2>
+    <div class="card"><div class="grid grid-cols-3 text-center"><div><p class="text-2xl font-extrabold" id="ps" style="background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">0</p><p class="text-xs font-medium mt-0.5" style="color:var(--muted)">Sesiones</p></div><div><p class="text-2xl font-extrabold" id="pr" style="color:#f59e0b">0</p><p class="text-xs font-medium mt-0.5" style="color:var(--muted)">Racha</p></div><div><p class="text-2xl font-extrabold" id="pb" style="color:var(--success)">0</p><p class="text-xs font-medium mt-0.5" style="color:var(--muted)">Récord</p></div></div></div>
+    <div class="card"><p class="label">Calendario semanal</p><div class="flex justify-between mt-2" id="pcal"></div><p class="text-xs text-center mt-2" style="color:var(--muted)" id="wlbl"></p></div>
+    <div class="card">
+        <p class="label">Registro de peso e IMC</p>
+        <div class="flex gap-2 mt-2"><input type="number" id="w-inp" placeholder="Peso (kg)" step="0.1" min="35" max="200" style="flex:1;padding:0.65rem 0.8rem;border-radius:14px;border:1.5px solid var(--border);font-family:var(--font);font-size:0.88rem;outline:none"><input type="number" id="h-inp" placeholder="Altura (cm)" step="1" min="100" max="220" style="flex:1;padding:0.65rem 0.8rem;border-radius:14px;border:1.5px solid var(--border);font-family:var(--font);font-size:0.88rem;outline:none"><button class="btn btn-primary" style="width:auto;padding:0.65rem 1rem;font-size:0.82rem" onclick="saveWeight()">💾</button></div>
+        <div class="grid grid-cols-3 gap-3 mt-3 text-center"><div><p class="text-2xl font-extrabold" id="imc-v" style="color:var(--primary)">--</p><p class="text-xs font-medium" style="color:var(--muted)">IMC</p></div><div><p class="text-2xl font-extrabold" id="imc-w" style="color:var(--warm)">--</p><p class="text-xs font-medium" style="color:var(--muted)">Peso</p></div><div><p class="text-2xl font-extrabold" id="imc-c" style="color:var(--soft);font-size:1rem">--</p><p class="text-xs font-medium" style="color:var(--muted)">Categoría</p></div></div>
+        <p class="text-xs mt-2" style="color:var(--muted)" id="imc-date"></p>
+    </div>
+    <div class="card">
+        <p class="label">Historial de peso</p>
+        <div id="whist" class="space-y-2 mt-2" style="max-height:240px;overflow-y:auto"></div>
+    </div>
+    <div class="card text-center" style="background:var(--primary-soft)"><p class="font-semibold italic leading-relaxed" style="color:var(--primary)" id="quote"></p></div>
+</div></section>
+
+<section id="screen-nutrition" class="screen"><div class="scroll-area">
+    <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
+    <h2 class="text-2xl font-extrabold">🥗 Menú semanal</h2>
+    <p class="text-sm" style="color:var(--muted);margin-top:-0.8rem">Plan completo · <span id="menu-week-label"></span></p>
+    <div id="menu-container" class="space-y-3"></div>
+</div></section>
+
+<section id="screen-madrid" class="screen"><div class="scroll-area">
+    <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
+    <h2 class="text-2xl font-extrabold">🗺️ Madrid Secreto</h2>
+    <p class="text-sm" style="color:var(--muted);margin-top:-0.8rem">Planes con niños (2-10 años) · Casi todos gratis</p>
+    <div id="plans-container" class="space-y-4"></div>
+</div></section>
+
+<section id="screen-pottery" class="screen"><div class="scroll-area">
+    <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
+    <h2 class="text-2xl font-extrabold">🏺 Cerámica Aesthetic</h2>
+    <p class="text-sm" style="color:var(--muted);margin-top:-0.8rem">Inspiración de taller · Esmaltes naturales · Formas orgánicas</p>
+    <div id="pottery-container" class="space-y-4"></div>
+</div></section>
+
+<section id="screen-plans" class="screen"><div class="scroll-area">
+    <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
+    <h2 class="text-2xl font-extrabold">Elige tu plan</h2>
+    <div class="plan-card" id="pmf" onclick="selP('mamifit')"><div class="flex gap-3"><span class="text-3xl">🐷</span><div><h3 class="font-extrabold text-lg">MamiFit</h3><p class="label">Gratuito</p><ul class="text-sm space-y-1.5 mt-2" style="color:var(--soft)"><li>Rutinas diarias 20 min</li><li>3 niveles</li><li>Menú semanal</li><li>Madrid Secreto</li><li>Cerámica Aesthetic</li></ul></div></div></div>
+    <div class="plan-card" id="pmg" onclick="selP('mamigorda')"><span class="plan-badge">Premium</span><div class="flex gap-3"><span class="text-3xl">🦋</span><div><h3 class="font-extrabold text-lg">MamiGorda</h3><p class="label">Acompañamiento premium</p><p class="text-sm mt-2 leading-relaxed" style="color:var(--soft)">Etapa de transición con más soporte. Sin prisas, sin juicios.</p><ul class="text-sm space-y-1.5 mt-2" style="color:var(--soft)"><li>Todo MamiFit</li><li>Rutinas guiadas</li><li>Plan 8 semanas</li><li>Comunidad privada</li></ul></div></div></div>
+    <button class="btn btn-primary" onclick="confirmP()">Guardar plan</button>
+</div></section>
+
+<nav class="bnav">
+    <div class="bnav-inner">
+        <button data-scr="screen-home" onclick="navTo('screen-home')"><span class="ni">🏠</span>Inicio</button>
+        <button data-scr="screen-routine" onclick="navTo('screen-routine')"><span class="ni">💪</span>Rutina</button>
+        <button data-scr="screen-nutrition" onclick="navTo('screen-nutrition')"><span class="ni">🥗</span>Menú</button>
+        <button data-scr="screen-madrid" onclick="navTo('screen-madrid')"><span class="ni">🗺️</span>Finde</button>
+        <button data-scr="screen-pottery" onclick="navTo('screen-pottery')"><span class="ni">🏺</span>Crear</button>
+        <button data-scr="screen-progress" onclick="navTo('screen-progress')"><span class="ni">📊</span>Progreso</button>
+    </div>
+</nav>
+
+</div>
+
+<script>
+// ===== GLOBAL SCOPE FUNCTIONS (para onclick inline) =====
+
+// Funciones expuestas globalmente
+var navTo, retakeQuiz, quizNext, quizBack, so;
+var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd, selP, confirmP, saveWeight;
+
+(function(){
+    var S = {
+        plan: localStorage.getItem('mfp')||'mamifit',
+        lvl: localStorage.getItem('mfl')||'base',
+        kids: localStorage.getItem('mfk')==='true',
+        sess: JSON.parse(localStorage.getItem('mfs')||'[]'),
+        done: {},
+        sec: 1200, tid: null, run: false,
+        onboarded: localStorage.getItem('mfonboarded')==='true',
+        profile: JSON.parse(localStorage.getItem('mfprofile')||'null')||{},
+        weightLog: JSON.parse(localStorage.getItem('mfweight')||'[]')
+    };
+    var sv = function(k,v){localStorage.setItem('mf'+k,JSON.stringify(v));};
+    var td = function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+    var bk = function(l,i){return l+'_'+i;};
+
+    function seedFromDate(d){var h=0;for(var i=0;i<d.length;i++){h=((h<<5)-h)+d.charCodeAt(i);h|=0;}return Math.abs(h);}
+    function sRnd(s){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;}
+    function sPick(a,s){return a[Math.floor(sRnd(s)*a.length)];}
+    function shuffle(a,s){var r=a.slice();for(var i=r.length-1;i>0;i--){var j=Math.floor(sRnd(s+i)*(i+1));var t=r[i];r[i]=r[j];r[j]=t;}return r;}
+    function weekNum(){var now=new Date();var start=new Date(now.getFullYear(),0,1);var diff=now-start+(start.getTimezoneOffset()-now.getTimezoneOffset())*60000;return Math.floor(diff/604800000);}
+
+    var VID = {'Sentadillas asistidas':'RoyfbpR5nmA','Sentadillas completas':'RoyfbpR5nmA','Sentadillas a silla':'RoyfbpR5nmA','Flexiones en pared':'YB0egDzsu18','Flexiones de rodillas':'IODxDxXOCBU','Plancha de rodillas':'sKR9LozSZvE','Plancha completa':'sKR9LozSZvE','Zancadas suaves':'ASdqJoDPMHA','Zancadas alternas':'ASdqJoDPMHA','Puente de glúteos':'OUgsJj8Pmv0','Puente a una pierna':'VUl8R0kn6v4','Escaladores':'ixxk9Qfn61o','Estiramiento final':'3N_8ioZ4jdk','Movilidad articular':'yIOrimclYDc','Estiramiento gato-vaca':'xyNwxiuERXc','Círculos de brazos':'yIOrimclYDc','Balanceo de piernas':'yIOrimclYDc','Respiración diafragmática':'9jpchJcKivk','🐸 Saltos de rana con peques':'hZb6jTbCLeE'};
+    var IC = {squat:'🧘',pushup:'💪',plank:'🎯',lunge:'🚶',bridge:'🍑',stretch:'🧘',mobility:'🌀',breathing:'🌬️'};
+    var EX = {base:[{n:'Sentadillas asistidas',r:'3×10',d:'Apóyate en una silla',t:'Pies ancho hombros. Pecho arriba.',ik:'squat'},{n:'Flexiones en pared',r:'3×10',d:'Empuja contra la pared',t:'Manos altura pecho.',ik:'pushup'},{n:'Plancha de rodillas',r:'3×20"',d:'Rodillas apoyadas, abdomen firme',t:'Codos bajo hombros.',ik:'plank'},{n:'Zancadas suaves',r:'2×8/lado',d:'Paso corto, sin prisas',t:'Rodilla no sobrepasa punta pie.',ik:'lunge'},{n:'Puente de glúteos',r:'3×12',d:'Boca arriba, eleva cadera',t:'Talones apoyados.',ik:'bridge'},{n:'Estiramiento final',r:'3 min',d:'Respira y estira el cuerpo',t:'Sin rebotes. 20-30s.',ik:'stretch'}],intermedio:[{n:'Sentadillas completas',r:'4×12',d:'Muslos paralelos al suelo',t:'Inspira al bajar.',ik:'squat'},{n:'Flexiones de rodillas',r:'4×8-10',d:'Pecho al suelo desde rodillas',t:'Codos 45°.',ik:'pushup'},{n:'Plancha completa',r:'3×30"',d:'Cuerpo recto en puntas',t:'Línea recta.',ik:'plank'},{n:'Zancadas alternas',r:'3×10/lado',d:'Paso amplio controlado',t:'Rodilla 90°.',ik:'lunge'},{n:'Escaladores',r:'3×20"',d:'Rodillas al pecho en plancha',t:'Caderas bajas.',ik:'plank'},{n:'Puente a una pierna',r:'3×8/lado',d:'Una pierna elevada',t:'Empuja con talón.',ik:'bridge'},{n:'Estiramiento final',r:'3 min',d:'Estiramientos profundos',t:'30s por grupo.',ik:'stretch'}],suave:[{n:'Movilidad articular',r:'3 min',d:'Rota articulaciones suave',t:'Círculos suaves.',ik:'mobility'},{n:'Sentadillas a silla',r:'2×8',d:'Siéntate y levántate',t:'Controla la bajada.',ik:'squat'},{n:'Estiramiento gato-vaca',r:'2×8',d:'Arquea y redondea espalda',t:'Inspira al arquear.',ik:'stretch'},{n:'Círculos de brazos',r:'2×30"',d:'Brazos en cruz, círculos',t:'Nota calor hombros.',ik:'stretch'},{n:'Balanceo de piernas',r:'2×10/lado',d:'Balancea adelante-atrás',t:'Apóyate. Sin forzar.',ik:'lunge'},{n:'Respiración diafragmática',r:'3 min',d:'Tumbada, respira profundo',t:'Inhala 4s, exhala 6s.',ik:'breathing'}]};
+    var KIDB = {n:'🐸 Saltos de rana con peques',r:'2 min',d:'Salta como ranita',t:'Diversión pura. ¡Risas!',ik:'squat'};
+    var MOTS = ['"Cada gota de sudor es una carta de amor a tu cuerpo."','"No necesitas ser perfecta, solo constante."','"20 minutos para ti son el mejor regalo."','"Tu fuerza inspira a quienes te rodean."','"Hoy eliges cuidarte. Eso ya es ganar."','"Pequeños pasos, grandes cambios."','"La disciplina es amor propio."','"Mujeres que se mueven, transforman."'];
+    var RNM = {base:['Energía suave','Fuerza inicial','Paso a paso'],intermedio:['Potencia total','Fuego interior','Ritmo fuerte'],suave:['Fluye con calma','Respiro consciente','Cuerpo presente']};
+
+    // MENU DATA
+    var MENUS = [[{d:'Lunes',D:'🥣 Porridge de avena con plátano',C:'🥗 Quinoa, aguacate y pollo',N:'🍲 Crema de calabaza'},{d:'Martes',D:'🥑 Tostada con aguacate y huevo',C:'🐟 Salmón al horno con brócoli',N:'🥬 Revuelto de espárragos'},{d:'Miércoles',D:'🍓 Yogur con granola y frutos rojos',C:'🍛 Pollo al curry con arroz integral',N:'🥣 Gazpacho con huevo duro'},{d:'Jueves',D:'🥞 Tortitas de avena y plátano',C:'🥙 Garbanzos, calabacín y menta',N:'🍆 Berenjena rellena de verduras'},{d:'Viernes',D:'🍌 Smoothie verde detox',C:'🍣 Wok de verduras y tofu',N:'🍕 Pizza con base de coliflor'},{d:'Sábado',D:'🥚 Revuelto de huevos con tomate',C:'🥩 Pollo a la plancha con ensalada',N:'🥗 Ensalada de lentejas'},{d:'Domingo',D:'🧇 Overnight oats de chía y cacao',C:'🥘 Lentejas estofadas',N:'🍵 Crema de zanahoria'}],[{d:'Lunes',D:'🍞 Tostada integral con tomate',C:'🥗 Ensalada de pasta con atún',N:'🥦 Brócoli gratinado'},{d:'Martes',D:'🥤 Batido de plátano y canela',C:'🍗 Muslos de pollo asados',N:'🥒 Crema de pepino'},{d:'Miércoles',D:'🍳 Tortilla con espinacas',C:'🐟 Merluza a la plancha',N:'🥬 Ensalada de garbanzos'},{d:'Jueves',D:'🥜 Tostada con crema de cacahuete',C:'🥙 Wrap de pavo y verduras',N:'🍜 Sopa de fideos'},{d:'Viernes',D:'🍎 Yogur con manzana asada',C:'🍣 Sushi bowl de salmón',N:'🥘 Tortilla de calabacín'},{d:'Sábado',D:'🥞 Crepes integrales con fruta',C:'🍔 Hamburguesa de pollo casera',N:'🥗 Ensalada caprese'},{d:'Domingo',D:'🥣 Porridge con frutos secos',C:'🥩 Ternera guisada',N:'🍵 Puré de verduras'}],[{d:'Lunes',D:'🍞 Pan integral con hummus',C:'🥗 Ensalada de arroz salvaje',N:'🥣 Sopa minestrone'},{d:'Martes',D:'🥚 Huevos revueltos con champiñones',C:'🐟 Sardinas a la plancha',N:'🥦 Coliflor al horno'},{d:'Miércoles',D:'🥣 Muesli con leche y fruta',C:'🍛 Lentejas al curry',N:'🥒 Crema de calabacín'},{d:'Jueves',D:'🍌 Yogur con plátano y nueces',C:'🍗 Pechuga de pollo rellena',N:'🥬 Ensalada de espinacas'},{d:'Viernes',D:'🥤 Smoothie de mango',C:'🍣 Bowl de arroz con salmón',N:'🥘 Revuelto de setas'},{d:'Sábado',D:'🥐 Tostada francesa integral',C:'🥙 Falafel con ensalada',N:'🍆 Pisto manchego'},{d:'Domingo',D:'🥞 Tortitas de calabaza',C:'🥘 Paella integral',N:'🍵 Crema de puerros'}],[{d:'Lunes',D:'🍞 Tostada con aguacate',C:'🥗 Ensalada tibia de patata',N:'🥣 Puré de calabacín'},{d:'Martes',D:'🥣 Gachas de avena con compota',C:'🐟 Bacalao al horno',N:'🥬 Tortilla de acelgas'},{d:'Miércoles',D:'🍳 Huevo poché con espárragos',C:'🍛 Garbanzos con espinacas',N:'🥒 Gazpacho verde'},{d:'Jueves',D:'🥜 Bowl de kéfir y granola',C:'🍗 Pollo teriyaki con arroz',N:'🍜 Sopa de miso'},{d:'Viernes',D:'🍞 Pan con tomate y jamón',C:'🥙 Ensalada de bulgur',N:'🍕 Mini pizzas de berenjena'},{d:'Sábado',D:'🥣 Smoothie bowl de frutos rojos',C:'🍔 Hamburguesa de lentejas',N:'🥗 Ensalada de pasta'},{d:'Domingo',D:'🥞 Panqueques de avena',C:'🥘 Arroz caldoso',N:'🥣 Crema de espárragos'}]];
+
+    // MADRID DATA
+    var MADPLANS = [{name:'Teatro de Títeres del Retiro',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Funciones de títeres y marionetas al aire libre todos los findes. Los niños se sientan en el césped y alucinan. Un clásico que nunca falla.',tips:'Llega 15 min antes. Puerta de la Independencia. Lleva algo para sentarte.',horario:'Sábados y domingos 12:30'},{name:'Parque de El Capricho',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Uno de los jardines más bellos y desconocidos. Laberintos, grutas, estanques y un palacete. Solo abre fines de semana. Una joya secreta.',tips:'Solo findes y festivos. No pelotas ni bicis. Muy tranquilo. Lleva picnic.',horario:'Findes 9-21h'},{name:'Templo de Debod + picnic',zone:'Plaza España',price:'Gratis',age:'3-10 años',desc:'Templo egipcio de más de 2200 años en pleno centro. Los niños flipan. Jardines perfectos para picnic con las mejores vistas de Madrid.',tips:'Cola para entrar. Atardecer mágico. Mejor entre semana.',horario:'Mar-Dom 10-20h'},{name:'Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Almendros en flor (feb-mar), laberintos vegetales, estanques con patos. Espectáculo rosa en primavera. Parque secreto precioso.',tips:'Imprescindible en floración. Metro Suanzes L5.',horario:'Abierto todo el año'},{name:'Madrid Río: toboganes XXL',zone:'Arganzuela',price:'Gratis',age:'2-10 años',desc:'17 áreas de juego con toboganes gigantes, tirolinas y zona de agua. Kilómetros de parque junto al Manzanares.',tips:'Zona Puente del Rey = mejores toboganes. Lleva patinete.',horario:'Siempre abierto'},{name:'Cerro del Tío Pío',zone:'Vallecas',price:'Gratis',age:'2-10 años',desc:'Colinas verdes con las mejores vistas de Madrid. Para volar cometas, rodar por el césped y ver atardeceres brutales.',tips:'Al atardecer es increíble. Lleva cometa. Poca sombra.',horario:'Siempre abierto'},{name:'Cambio de Guardia Real',zone:'Centro',price:'Gratis',age:'4-10 años',desc:'Desfile de soldados con uniformes de época, caballos y música. Los niños se quedan con la boca abierta.',tips:'Miércoles y sábados 11h. Llega 20 min antes.',horario:'Miércoles y sábados'},{name:'Palacio de Cristal (Retiro)',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Palacio de cristal y hierro de 1887. Exposiciones de arte y patos en el estanque. Pura magia en medio del parque.',tips:'Entrada libre. Combínalo con paseo en barca.',horario:'Todos los días'},{name:'Parque Juan Carlos I',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Parque enorme sin masificar. Lago, olivos centenarios, esculturas. Ideal para bici o patinete sin aglomeraciones.',tips:'Alquiler de bicis en entrada. Día entero sin gente.',horario:'Siempre abierto'},{name:'Casa de Campo: lago y ardillas',zone:'Moncloa',price:'Gratis',age:'2-10 años',desc:'El parque más grande. Lago, merenderos y ardillas que comen de tu mano. Naturaleza pura a un metro de Gran Vía.',tips:'Lleva frutos secos sin sal. Merenderos tras pistas de tenis.',horario:'Siempre abierto'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres, teatro, títeres y cine los findes. Cafetería agradable y mucho espacio.',tips:'Consulta programación web. Metro Legazpi L3.',horario:'Findes'},{name:'Parque Felipe VI',zone:'Valdebebas',price:'Gratis',age:'3-10 años',desc:'Parque de aventura con toboganes metálicos gigantes, redes de escalada y tirolinas. Pura adrenalina para peques.',tips:'Mejor pantalón largo. Cercanías Valdebebas.',horario:'Siempre abierto'},{name:'Espacio Abierto Quinta Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres gratuitos, cuentacuentos y teatro. La Urbanoteca es un espacio de juego interior maravilloso.',tips:'Algunas actividades requieren inscripción.',horario:'Consultar web'},{name:'Jardín Botánico',zone:'Atocha',price:'4€ adultos, niños gratis',age:'3-10 años',desc:'5000+ especies de plantas. Invernaderos, bonsáis centenarios y talleres familiares los fines de semana.',tips:'Niños gratis. Talleres findes. Metro Atocha.',horario:'Mar-Dom'},{name:'Museo Ciencias Naturales',zone:'Chamberí',price:'Gratis dom 17-20h',age:'4-10 años',desc:'Dinosaurios, minerales, meteoritos. El museo favorito de los niños. Gratis los domingos por la tarde.',tips:'Gratis domingos 17-20h. Sala dinosaurios brutal.',horario:'Mar-Dom'}];
+
+    // POTTERY DATA
+    var POTTERY = [{name:'Jarrón orgánico asimétrico',desc:'Formas curvas e imperfectas trabajadas en torno. Esmalte blanco roto con textura de goteo. La belleza de lo irregular.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Set de cuencos apilables',desc:'Tres cuencos en tonos tierra. Arcilla roja con esmalte interior crema. Del torno a tu mesa.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Taza con asa esculpida',desc:'Esmalte azul cobalto sobre arcilla clara. Asa trabajada por separado y fusionada. Cada taza es irrepetible.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Juego de té minimalista',desc:'Líneas limpias, acabado satinado. Tetera y dos tazas en porcelana de alta temperatura. La elegancia de lo simple.',img:'https://images.unsplash.com/photo-1633101200145-148a40ea7193?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Portavelas escultórico',desc:'Forma de media luna. Textura rugosa conseguida con esponja natural. Luz y sombra en una pieza.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Plato con flora prensada',desc:'Arcilla extendida con flores silvestres prensadas. Tras la cocción quedan las huellas botánicas pintadas a mano.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Macetero textura cordón',desc:'Técnica de churros visibles. Esmalte verde oliva. El cordón exterior crea un ritmo visual hipnótico.',img:'https://images.unsplash.com/photo-1599259705568-5fbd3974c4b9?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Jarrón de dos tonos',desc:'Mitad esmalte blanco mate, mitad arcilla pulida. La transición entre texturas es pura poesía visual.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=600&h=360&fit=crop&auto=format&q=80'}];
+
+    function getMenu(){return MENUS[weekNum()%MENUS.length];}
+    function getPlans(){return shuffle(MADPLANS,seedFromDate('mp'+weekNum())+33).slice(0,5);}
+    function getPottery(){return shuffle(POTTERY,seedFromDate('pt'+weekNum())+99).slice(0,4);}
+
+    function renderMenu(){
+        var m=getMenu();
+        document.getElementById('menu-week-label').textContent='Semana '+(weekNum()%MENUS.length+1)+' de '+MENUS.length;
+        document.getElementById('menu-container').innerHTML=m.map(function(day,i){return'<div class="menu-day a-up" style="animation-delay:'+(i*0.04)+'s"><div class="menu-day-header" style="background:var(--primary-soft);color:var(--primary)">'+day.d+'</div><div class="menu-row"><div class="menu-cell"><p class="text-xs font-semibold">🌅</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.D+'</p></div><div class="menu-cell"><p class="text-xs font-semibold">☀️</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.C+'</p></div><div class="menu-cell"><p class="text-xs font-semibold">🌙</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.N+'</p></div></div></div>';}).join('');
+    }
+
+    function renderPlans(){
+        var p=getPlans();
+        document.getElementById('plans-container').innerHTML=p.map(function(x,i){return'<div class="place-card a-up" style="animation-delay:'+(i*0.05)+'s"><div class="place-header"><div class="flex items-center justify-between flex-wrap gap-2 mb-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:'+(x.price==='Gratis'?'#ecfdf5':'#fef9ef')+';color:'+(x.price==='Gratis'?'#059669':'#d97706')+'">'+x.price+'</span><span class="text-xs" style="color:var(--muted)">👶 '+x.age+'</span></div><h3 class="font-extrabold text-lg">'+x.name+'</h3><div class="flex flex-wrap gap-2 mt-1"><span class="text-xs" style="color:var(--muted)">📍 '+x.zone+'</span><span class="text-xs" style="color:var(--muted)">🕐 '+x.horario+'</span></div></div><div class="place-body"><p class="text-sm mb-3" style="color:var(--soft)">'+x.desc+'</p><div style="background:#eff6ff;border-radius:12px;padding:0.7rem 1rem"><p class="text-xs" style="color:#2563eb"><strong>💡</strong> '+x.tips+'</p></div></div></div>';}).join('');
+    }
+
+    function renderPottery(){
+        var pt=getPottery();
+        document.getElementById('pottery-container').innerHTML=pt.map(function(x,i){return'<div class="pottery-card a-up" style="animation-delay:'+(i*0.06)+'s"><img src="'+x.img+'" alt="'+x.name+'" class="pottery-img" loading="lazy"><div class="pottery-body"><h3 class="font-extrabold text-lg mb-1">'+x.name+'</h3><p class="text-sm" style="color:var(--soft)">'+x.desc+'</p></div></div>';}).join('');
+    }
+
+    // ===== UTILS =====
+    function wd(){var n=new Date(),day=n.getDay(),off=day===0?-6:1-day;var m=new Date(n);m.setDate(n.getDate()+off);var r=[];for(var i=0;i<7;i++){var d=new Date(m);d.setDate(m.getDate()+i);r.push(d);}return r;}
+    function fd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+    function streak(){if(!S.sess.length)return 0;var s=S.sess.slice().sort().reverse();var c=0,t=td();if(s[0]===t){c=1;var d=new Date();d.setDate(d.getDate()-1);t=fd(d);}for(var i=(s[0]===td()?1:0);i<s.length;i++){if(s[i]===t){c++;var d2=new Date(t);d2.setDate(d2.getDate()-1);t=fd(d2);}else break;}return c;}
+    function bestS(){if(!S.sess.length)return 0;var s=S.sess.slice().sort();var b=0,c=1;for(var i=1;i<s.length;i++){if(Math.round((new Date(s[i])-new Date(s[i-1]))/86400000)===1)c++;else{b=Math.max(b,c);c=1;}}return Math.max(b,c);}
+    function cntD(){var bl=EX[S.lvl].slice();if(S.kids)bl.push(KIDB);return bl.filter(function(_,i){return S.done[bk(S.lvl,i)];}).length;}
+    function cntT(){var bl=EX[S.lvl].slice();if(S.kids)bl.push(KIDB);return bl.length;}
+
+    function confetti(){var cols=['#7c3aed','#f472b6','#f59e0b','#10b981','#a855f7'];for(var i=0;i<28;i++){setTimeout(function(){var el=document.createElement('div');el.className='confetti-piece';el.style.left=Math.random()*100+'%';el.style.top=(30+Math.random()*40)+'%';el.style.background=cols[Math.floor(Math.random()*cols.length)];el.style.width=(4+Math.random()*7)+'px';el.style.height=(4+Math.random()*7)+'px';el.style.animationDuration=(0.5+Math.random()*0.6)+'s';document.body.appendChild(el);setTimeout(function(){el.remove();},1000);},i*16);}}
+
+    // ===== NAVIGATION =====
+    navTo = function(id){
+        document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+        var tgt = document.getElementById(id);
+        if(tgt) tgt.classList.add('active');
+        document.querySelectorAll('.bnav-inner button').forEach(function(b){b.classList.remove('nav-active');});
+        var nb = document.querySelector('.bnav-inner button[data-scr="'+id+'"]');
+        if(nb) nb.classList.add('nav-active');
+        if(id==='screen-nutrition') renderMenu();
+        if(id==='screen-madrid') renderPlans();
+        if(id==='screen-pottery') renderPottery();
+        updAll();
+        window.scrollTo({top:0,behavior:'smooth'});
+    };
+
+    function updAll(){updHome();updR();updP();updPl();}
+    function updHome(){
+        document.getElementById('sess-n').textContent=S.sess.length;
+        document.getElementById('strk-n').textContent=streak();
+        document.getElementById('plan-nm').textContent=S.plan==='mamigorda'?'MamiGorda':'MamiFit';
+        document.getElementById('plan-ico').textContent=S.plan==='mamigorda'?'🦋':'🐷';
+        var wk=wd(),tf=td();
+        document.getElementById('cal-mini').innerHTML=wk.map(function(d,i){var df=fd(d),a=S.sess.includes(df),t=df===tf;return'<div class="dday'+(a?' filled':'')+(t?' today':'')+'">'+['L','M','X','J','V','S','D'][i]+'</div>';}).join('');
+    }
+    function updR(){
+        var l=S.lvl,k=S.kids;
+        var bd=document.getElementById('rbadge');
+        if(l==='base'){bd.textContent='Base';bd.style.background='#10b981';}
+        else if(l==='intermedio'){bd.textContent='Intermedio';bd.style.background='#7c3aed';}
+        else{bd.textContent='Día suave';bd.style.background='#f59e0b';}
+        var ds=seedFromDate(td());
+        document.getElementById('rnm').textContent=sPick(RNM[l],ds);
+        document.querySelectorAll('#chips .chip').forEach(function(c){c.classList.toggle('active',c.dataset.lvl===l);});
+        document.getElementById('kidstg').classList.toggle('on',k);
+        var base=EX[l].slice(),sh=shuffle(base,ds+100);
+        var last=sh.find(function(e){return e.n.includes('Estiramiento')||e.n.includes('Respiración')||e.n.includes('Movilidad');});
+        var rest=sh.filter(function(e){return e!==last;});
+        var bl=rest.slice();if(last)bl.push(last);if(k)bl.push(KIDB);
+        document.getElementById('bcont').innerHTML=bl.map(function(ex,i){var key=bk(l,i),isD=S.done[key]||false,vi=VID[ex.n]||'RoyfbpR5nmA';return'<div class="ex-card a-up" style="animation-delay:'+(i*0.02)+'s" data-key="'+key+'"><div class="ex-head" onclick="tc(this.parentElement,\''+key+'\')"><div class="ex-icon">'+(IC[ex.ik]||'💪')+'</div><span class="ex-num">'+(i+1)+'</span><div class="ex-info"><p class="font-semibold text-sm">'+ex.n+'</p><p class="text-xs" style="color:var(--muted)">'+ex.d+'</p></div><span class="ex-reps">'+ex.r+'</span><div class="ex-check'+(isD?' done':'')+'" onclick="event.stopPropagation();tdd(\''+key+'\')">✓</div><span class="ex-chev">▼</span></div><div class="ex-body"><div class="ex-vid"><iframe src="https://www.youtube.com/embed/'+vi+'?rel=0&modestbranding=1" title="Tutorial" allowfullscreen loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div><div class="ex-tip"><strong style="color:var(--primary)">💡</strong> '+ex.t+'</div></div></div>';}).join('');
+        document.getElementById('dn').textContent=cntD();document.getElementById('tn').textContent=cntT();
+        document.getElementById('progf').style.width=(cntT()>0?cntD()/cntT()*100:0)+'%';
+        document.getElementById('doneb').style.display='none';rtUI();
+    }
+    function updP(){
+        document.getElementById('ps').textContent=S.sess.length;
+        document.getElementById('pr').textContent=streak();
+        document.getElementById('pb').textContent=bestS();
+        document.getElementById('quote').textContent=sPick(MOTS,seedFromDate(td()));
+        var wk=wd(),tf=td();
+        document.getElementById('pcal').innerHTML=wk.map(function(d,i){var df=fd(d),a=S.sess.includes(df),t=df===tf;return'<div class="dday'+(a?' filled':'')+(t?' today':'')+'">'+['L','M','X','J','V','S','D'][i]+'</div>';}).join('');
+        document.getElementById('wlbl').textContent=wk[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' — '+wk[6].toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+        renderWeightUI();
+    }
+    function updPl(){document.getElementById('pmf').classList.toggle('selected',S.plan==='mamifit');document.getElementById('pmg').classList.toggle('selected',S.plan==='mamigorda');}
+
+    // ===== EXERCISE CARD TOGGLE =====
+    tc = function(el,key){
+        var was=el.classList.contains('open');
+        document.querySelectorAll('.ex-card.open').forEach(function(c){if(c!==el)c.classList.remove('open');});
+        if(was)el.classList.remove('open');
+        else{el.classList.add('open');setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);}
+    };
+    tdd = function(key){
+        S.done[key]=!S.done[key];if(!S.done[key])delete S.done[key];
+        var card=document.querySelector('[data-key="'+key+'"]');
+        if(card){card.querySelector('.ex-check').classList.toggle('done',!!S.done[key]);}
+        document.getElementById('dn').textContent=cntD();
+        document.getElementById('progf').style.width=(cntT()>0?cntD()/cntT()*100:0)+'%';
+    };
+
+    // ===== TIMER =====
+    function rtUI(){S.sec=1200;S.run=false;if(S.tid){clearInterval(S.tid);S.tid=null;}document.getElementById('timer').querySelector('.tnum').textContent='20:00';document.getElementById('timer').classList.remove('running','done');document.getElementById('tbtn').textContent='▶ Iniciar';document.getElementById('doneb').style.display='none';}
+    toggleTimer = function(){
+        if(S.run){S.run=false;if(S.tid){clearInterval(S.tid);S.tid=null;}document.getElementById('tbtn').textContent='▶ Reanudar';document.getElementById('timer').classList.remove('running');}
+        else{S.run=true;document.getElementById('tbtn').textContent='⏸ Pausar';document.getElementById('timer').classList.add('running');S.tid=setInterval(function(){if(S.sec<=0){clearInterval(S.tid);S.tid=null;S.run=false;document.getElementById('timer').querySelector('.tnum').textContent='¡Listo!';document.getElementById('timer').classList.remove('running');document.getElementById('timer').classList.add('done');document.getElementById('tbtn').textContent='▶ Iniciar';document.getElementById('doneb').style.display='block';document.getElementById('doneb').scrollIntoView({behavior:'smooth'});if(navigator.vibrate)navigator.vibrate([200,100,200]);}else{S.sec--;var m=String(Math.floor(S.sec/60)).padStart(2,'0'),s=String(S.sec%60).padStart(2,'0');document.getElementById('timer').querySelector('.tnum').textContent=m+':'+s;}},1000);}
+    };
+    resetTimer = function(){if(S.tid){clearInterval(S.tid);S.tid=null;}S.run=false;S.sec=1200;document.getElementById('timer').querySelector('.tnum').textContent='20:00';document.getElementById('timer').classList.remove('running','done');document.getElementById('tbtn').textContent='▶ Iniciar';document.getElementById('doneb').style.display='none';};
+
+    // ===== COMPLETE / KIDS / LEVEL / NEW / PLAN =====
+    complete = function(){var t=td();if(!S.sess.includes(t)){S.sess.push(t);S.sess.sort();sv('s',S.sess);}S.done={};confetti();updAll();document.getElementById('doneb').style.display='none';rtUI();setTimeout(function(){navTo('screen-home');},1200);};
+    toggleKids = function(){S.kids=!S.kids;sv('k',S.kids);document.getElementById('kidstg').classList.toggle('on',S.kids);S.done={};updR();};
+    setLvl = function(lvl,el){S.lvl=lvl;sv('l',lvl);document.querySelectorAll('#chips .chip').forEach(function(c){c.classList.remove('active');});if(el)el.classList.add('active');S.done={};updR();};
+    newR = function(){S.done={};rtUI();updR();document.getElementById('exb').scrollIntoView({behavior:'smooth'});};
+    startR = function(){S.done={};navTo('screen-routine');rtUI();updR();};
+    selP = function(p){S.plan=p;updPl();};
+    confirmP = function(){sv('p',S.plan);updAll();confetti();setTimeout(function(){navTo('screen-home');},500);};
+
+    // ===== WEIGHT & IMC =====
+    saveWeight = function(){
+        var wInput = document.getElementById('w-inp');
+        var hInput = document.getElementById('h-inp');
+        var w = parseFloat(wInput.value);
+        var h = parseFloat(hInput.value);
+        if(!w || w<30 || w>250 || !h || h<100 || h>250){alert('Introduce peso (kg) y altura (cm) válidos.');return;}
+        var entry = {date: td(), weight: w, height: h};
+        S.weightLog.push(entry);
+        if(S.weightLog.length > 52) S.weightLog = S.weightLog.slice(-52);
+        sv('weight',S.weightLog);
+        wInput.value=''; hInput.value='';
+        renderWeightUI();
+        confetti();
+    };
+    window.saveWeight = saveWeight;
+
+    function renderWeightUI(){
+        var log = S.weightLog;
+        // Latest
+        if(log.length > 0){
+            var last = log[log.length-1];
+            var imc = last.weight / ((last.height/100)*(last.height/100));
+            document.getElementById('imc-v').textContent = imc.toFixed(1);
+            document.getElementById('imc-w').textContent = last.weight + ' kg';
+            var cat='', catCol='var(--soft)';
+            if(imc<18.5){cat='Bajo peso';catCol='#f59e0b';}
+            else if(imc<25){cat='Saludable';catCol='#10b981';}
+            else if(imc<30){cat='Sobrepeso';catCol='#f59e0b';}
+            else{cat='Obesidad';catCol='#ef4444';}
+            document.getElementById('imc-c').textContent = cat;
+            document.getElementById('imc-c').style.color = catCol;
+            document.getElementById('imc-date').textContent = 'Último registro: '+last.date;
+            document.getElementById('h-inp').value = last.height;
+        }
+        // History
+        var histHtml = '';
+        var recent = log.slice().reverse().slice(0,12);
+        var maxW = 0, minW = Infinity;
+        recent.forEach(function(e){if(e.weight>maxW)maxW=e.weight;if(e.weight<minW)minW=e.weight;});
+        var range = maxW-minW || 1;
+        recent.forEach(function(e,i){
+            var barW = ((e.weight-minW)/range)*100;
+            var arrow = '';
+            if(i<recent.length-1){
+                var prev = recent[i+1].weight;
+                if(e.weight<prev)arrow=' ↓';
+                else if(e.weight>prev)arrow=' ↑';
+                else arrow=' →';
+            }
+            var imcE = e.weight/((e.height/100)*(e.height/100));
+            var dotCol = imcE<25?'#10b981':imcE<30?'#f59e0b':'#ef4444';
+            histHtml += '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem"><span style="color:var(--muted);width:70px;text-align:right;flex-shrink:0">'+e.date.slice(5)+'</span><div style="flex:1;height:22px;background:#f5f0ff;border-radius:11px;overflow:hidden;position:relative"><div style="height:100%;width:'+barW+'%;background:'+dotCol+';border-radius:11px;opacity:0.5;transition:width 0.5s"></div><span style="position:absolute;left:8px;top:1px;font-size:0.7rem;font-weight:700;color:var(--ink)">'+e.weight+' kg</span></div><span style="color:var(--muted);width:24px;text-align:center">'+arrow+'</span></div>';
+        });
+        document.getElementById('whist').innerHTML = histHtml || '<p class="text-xs" style="color:var(--muted)">Aún no has registrado ningún peso.</p>';
+    }
+    window.saveWeight = saveWeight;
+
+    // ===== QUIZ =====
+    var QUIZ = [
+        {q:'¿Cuál es tu edad?',sub:'Para ajustar la intensidad a tu etapa vital.',opts:['18-29 años','30-39 años','40-49 años','50-59 años','60+'],key:'age'},
+        {q:'¿Cuál es tu objetivo principal?',sub:'Elige lo que más resuene contigo.',opts:['Sentirme más fuerte','Perder peso','Ganar flexibilidad','Reducir estrés','Salud general'],key:'goal'},
+        {q:'¿Cuál es tu nivel de actividad?',sub:'Sé honesta, no hay respuesta incorrecta.',opts:['Casi nada','Algo (camino a veces)','Moderada (1-2/sem)','Activa (3-4/sem)','Muy activa (5+/sem)'],key:'activity'},
+        {q:'¿Alguna lesión o condición?',sub:'Para adaptar los ejercicios.',opts:['No, estoy bien','Rodillas sensibles','Espalda delicada','Hombros/cuello','Prefiero no decir'],key:'injury'},
+        {q:'¿Entrenas con niños en casa?',sub:'Para activar el modo peques.',opts:['No','Sí, a veces','Sí, siempre conmigo'],key:'kids'},
+        {q:'¿Cuántos días puedes comprometerte?',sub:'Mejor poco constante que mucho y abandonar.',opts:['1-2 días','3-4 días','5-6 días','Cada día'],key:'days'}
+    ];
+    var qi=0,qa={};
+
+    function rq(){
+        if(qi>=QUIZ.length){finishQuiz();return;}
+        var q=QUIZ[qi],total=QUIZ.length,prog=Math.round((qi/total)*100);
+        document.getElementById('ob-prog').style.width=prog+'%';
+        document.getElementById('ob-steps').innerHTML=Array.from({length:total},function(_,i){var c='step-dot';if(i<qi)c+=' done';if(i===qi)c+=' current';return'<div class="'+c+'"></div>';}).join('');
+        document.getElementById('ob-question').innerHTML='<p class="label mb-1">Paso '+(qi+1)+' de '+total+'</p><h2 class="text-2xl font-extrabold mb-1">'+q.q+'</h2><p class="text-sm mb-4" style="color:var(--muted)">'+q.sub+'</p><div class="space-y-2">'+q.opts.map(function(o){return'<button class="quiz-option'+(qa[q.key]===o?' selected':'')+'" onclick="so(\''+q.key+'\',\''+o.replace(/'/g,"\\'")+'\',this)">'+o+'</button>';}).join('')+'</div>';
+        document.getElementById('ob-back').style.display=qi===0?'none':'inline-flex';
+        document.getElementById('ob-next').textContent=qi===total-1?'Finalizar →':'Continuar →';
+    }
+    so = function(key,value,el){qa[key]=value;document.querySelectorAll('#ob-question .quiz-option').forEach(function(b){b.classList.remove('selected');});el.classList.add('selected');};
+    quizNext = function(){var q=QUIZ[qi];if(!qa[q.key]){var btn=document.getElementById('ob-next');btn.style.transform='translateX(3px)';setTimeout(function(){btn.style.transform='';},200);return;}qi++;if(qi>=QUIZ.length)finishQuiz();else rq();};
+    quizBack = function(){if(qi>0){qi--;rq();}};
+    function finishQuiz(){
+        var act=qa['activity']||'',age=qa['age']||'',inj=qa['injury']||'',kidsA=qa['kids']||'',rl='base';
+        if(act.includes('Activa')||act.includes('Muy activa'))rl='intermedio';
+        if(inj.includes('Rodillas')||inj.includes('Espalda')||inj.includes('Hombros'))rl='suave';
+        if(age.includes('50')||age.includes('60'))rl='suave';
+        if(act.includes('Casi nada')&&!inj.includes('No'))rl='suave';
+        S.profile={answers:qa,recLvl:rl,recKids:kidsA.includes('Sí')||kidsA.includes('siempre'),date:td()};
+        S.lvl=rl;S.kids=S.profile.recKids;S.onboarded=true;
+        sv('profile',S.profile);sv('l',S.lvl);sv('k',S.kids);sv('onboarded',true);
+        document.getElementById('screen-onboard').classList.remove('active');document.getElementById('screen-onboard').style.display='none';
+        document.getElementById('screen-home').classList.add('active');
+        updAll();confetti();navTo('screen-home');
+    }
+    retakeQuiz = function(){qi=0;qa={};document.getElementById('screen-home').classList.remove('active');document.getElementById('screen-onboard').style.display='block';document.getElementById('screen-onboard').classList.add('active');rq();window.scrollTo({top:0,behavior:'smooth'});};
+
+    // ===== INIT =====
+    function init(){
+        if(!S.onboarded){
+            document.getElementById('screen-home').classList.remove('active');
+            document.getElementById('screen-onboard').style.display='block';document.getElementById('screen-onboard').classList.add('active');
+            if(Object.keys(S.profile).length>0){S.lvl=S.profile.recLvl||'base';S.kids=S.profile.recKids||false;}
+            rq();
+        }else{
+            document.getElementById('screen-onboard').style.display='none';document.getElementById('screen-onboard').classList.remove('active');
+            document.getElementById('screen-home').classList.add('active');
+        }
+        renderMenu();renderPlans();renderPottery();
+        updAll();
+        document.querySelectorAll('.bnav-inner button').forEach(function(b){b.classList.remove('nav-active');});
+        var hb=document.querySelector('.bnav-inner button[data-scr="screen-home"]');if(hb)hb.classList.add('nav-active');
+    }
+    init();
+
+})();
+</script>
+</body>
 </html>
