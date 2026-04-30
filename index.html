@@ -268,26 +268,63 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
     var MADPLANS = [{name:'Teatro de Títeres del Retiro',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Funciones de títeres y marionetas al aire libre todos los findes. Los niños se sientan en el césped y alucinan. Un clásico que nunca falla.',tips:'Llega 15 min antes. Puerta de la Independencia. Lleva algo para sentarte.',horario:'Sábados y domingos 12:30'},{name:'Parque de El Capricho',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Uno de los jardines más bellos y desconocidos. Laberintos, grutas, estanques y un palacete. Solo abre fines de semana. Una joya secreta.',tips:'Solo findes y festivos. No pelotas ni bicis. Muy tranquilo. Lleva picnic.',horario:'Findes 9-21h'},{name:'Templo de Debod + picnic',zone:'Plaza España',price:'Gratis',age:'3-10 años',desc:'Templo egipcio de más de 2200 años en pleno centro. Los niños flipan. Jardines perfectos para picnic con las mejores vistas de Madrid.',tips:'Cola para entrar. Atardecer mágico. Mejor entre semana.',horario:'Mar-Dom 10-20h'},{name:'Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Almendros en flor (feb-mar), laberintos vegetales, estanques con patos. Espectáculo rosa en primavera. Parque secreto precioso.',tips:'Imprescindible en floración. Metro Suanzes L5.',horario:'Abierto todo el año'},{name:'Madrid Río: toboganes XXL',zone:'Arganzuela',price:'Gratis',age:'2-10 años',desc:'17 áreas de juego con toboganes gigantes, tirolinas y zona de agua. Kilómetros de parque junto al Manzanares.',tips:'Zona Puente del Rey = mejores toboganes. Lleva patinete.',horario:'Siempre abierto'},{name:'Cerro del Tío Pío',zone:'Vallecas',price:'Gratis',age:'2-10 años',desc:'Colinas verdes con las mejores vistas de Madrid. Para volar cometas, rodar por el césped y ver atardeceres brutales.',tips:'Al atardecer es increíble. Lleva cometa. Poca sombra.',horario:'Siempre abierto'},{name:'Cambio de Guardia Real',zone:'Centro',price:'Gratis',age:'4-10 años',desc:'Desfile de soldados con uniformes de época, caballos y música. Los niños se quedan con la boca abierta.',tips:'Miércoles y sábados 11h. Llega 20 min antes.',horario:'Miércoles y sábados'},{name:'Palacio de Cristal (Retiro)',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Palacio de cristal y hierro de 1887. Exposiciones de arte y patos en el estanque. Pura magia en medio del parque.',tips:'Entrada libre. Combínalo con paseo en barca.',horario:'Todos los días'},{name:'Parque Juan Carlos I',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Parque enorme sin masificar. Lago, olivos centenarios, esculturas. Ideal para bici o patinete sin aglomeraciones.',tips:'Alquiler de bicis en entrada. Día entero sin gente.',horario:'Siempre abierto'},{name:'Casa de Campo: lago y ardillas',zone:'Moncloa',price:'Gratis',age:'2-10 años',desc:'El parque más grande. Lago, merenderos y ardillas que comen de tu mano. Naturaleza pura a un metro de Gran Vía.',tips:'Lleva frutos secos sin sal. Merenderos tras pistas de tenis.',horario:'Siempre abierto'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres, teatro, títeres y cine los findes. Cafetería agradable y mucho espacio.',tips:'Consulta programación web. Metro Legazpi L3.',horario:'Findes'},{name:'Parque Felipe VI',zone:'Valdebebas',price:'Gratis',age:'3-10 años',desc:'Parque de aventura con toboganes metálicos gigantes, redes de escalada y tirolinas. Pura adrenalina para peques.',tips:'Mejor pantalón largo. Cercanías Valdebebas.',horario:'Siempre abierto'},{name:'Espacio Abierto Quinta Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres gratuitos, cuentacuentos y teatro. La Urbanoteca es un espacio de juego interior maravilloso.',tips:'Algunas actividades requieren inscripción.',horario:'Consultar web'},{name:'Jardín Botánico',zone:'Atocha',price:'4€ adultos, niños gratis',age:'3-10 años',desc:'5000+ especies de plantas. Invernaderos, bonsáis centenarios y talleres familiares los fines de semana.',tips:'Niños gratis. Talleres findes. Metro Atocha.',horario:'Mar-Dom'},{name:'Museo Ciencias Naturales',zone:'Chamberí',price:'Gratis dom 17-20h',age:'4-10 años',desc:'Dinosaurios, minerales, meteoritos. El museo favorito de los niños. Gratis los domingos por la tarde.',tips:'Gratis domingos 17-20h. Sala dinosaurios brutal.',horario:'Mar-Dom'}];
 
     // POTTERY DATA
-    var POTTERY = [{name:'Jarrón orgánico asimétrico',desc:'Formas curvas e imperfectas trabajadas en torno. Esmalte blanco roto con textura de goteo. La belleza de lo irregular.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Set de cuencos apilables',desc:'Tres cuencos en tonos tierra. Arcilla roja con esmalte interior crema. Del torno a tu mesa.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Taza con asa esculpida',desc:'Esmalte azul cobalto sobre arcilla clara. Asa trabajada por separado y fusionada. Cada taza es irrepetible.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Juego de té minimalista',desc:'Líneas limpias, acabado satinado. Tetera y dos tazas en porcelana de alta temperatura. La elegancia de lo simple.',img:'https://images.unsplash.com/photo-1633101200145-148a40ea7193?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Portavelas escultórico',desc:'Forma de media luna. Textura rugosa conseguida con esponja natural. Luz y sombra en una pieza.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Plato con flora prensada',desc:'Arcilla extendida con flores silvestres prensadas. Tras la cocción quedan las huellas botánicas pintadas a mano.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Macetero textura cordón',desc:'Técnica de churros visibles. Esmalte verde oliva. El cordón exterior crea un ritmo visual hipnótico.',img:'https://images.unsplash.com/photo-1599259705568-5fbd3974c4b9?w=600&h=360&fit=crop&auto=format&q=80'},{name:'Jarrón de dos tonos',desc:'Mitad esmalte blanco mate, mitad arcilla pulida. La transición entre texturas es pura poesía visual.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=600&h=360&fit=crop&auto=format&q=80'}];
+    var POTTERY = [
+        {name:'Jarrón orgánico asimétrico',desc:'Formas curvas trabajadas en torno. La belleza de lo irregular.',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Set de cuencos apilables',desc:'Arcilla roja con esmalte interior crema. Del torno a tu mesa.',img:'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Taza esmalte cobalto',desc:'Azul profundo sobre arcilla clara. Cada pieza irrepetible.',img:'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Juego de té minimal',desc:'Porcelana de alta temperatura. La elegancia de lo simple.',img:'https://images.unsplash.com/photo-1633101200145-148a40ea7193?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Portavelas luna',desc:'Textura rugosa con esponja natural. Luz y sombra en una pieza.',img:'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Plato flora prensada',desc:'Flores silvestres prensadas. Huellas botánicas pintadas a mano.',img:'https://images.unsplash.com/photo-1565120020430-fa48c26c1dfe?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Macetero textura cordón',desc:'Técnica de churros visibles. Esmalte verde oliva.',img:'https://images.unsplash.com/photo-1599259705568-5fbd3974c4b9?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Jarrón de dos tonos',desc:'Mitad mate, mitad pulido. La transición es poesía visual.',img:'https://images.unsplash.com/photo-1614531341773-3bff8b7cb3fc?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Manos en el torno',desc:'El proceso es parte de la pieza. Arcilla viva entre dedos.',img:'https://images.unsplash.com/photo-1604881988758-f76ad2f7aac1?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Cuenco blanco interior',desc:'Interior crema, exterior sin esmaltar. Minimalismo puro.',img:'https://images.unsplash.com/photo-1481349518771-20055b2a7b24?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Vasija cuello estrecho',desc:'Forma de ánfora moderna. Esmalte reactivo al fuego.',img:'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Tazas de desayuno',desc:'Set de dos. Distintas pero complementarias.',img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Piezas de estante',desc:'Pequeñas vasijas decorativas. Arcilla negra sin esmaltar.',img:'https://images.unsplash.com/photo-1493476523860-a6de6ce1b0c3?w=400&h=540&fit=crop&auto=format&q=80'},
+        {name:'Taller en calma',desc:'Estantes llenos de piezas secando. La paciencia como técnica.',img:'https://images.unsplash.com/photo-1527515637462-cff94aca95e7?w=400&h=300&fit=crop&auto=format&q=80'},
+        {name:'Hacer es meditar',desc:'El barro centra. 20 minutos de torno equivalen a una sesión de yoga.',img:'https://images.unsplash.com/photo-1582233479366-6d38bc390a08?w=400&h=420&fit=crop&auto=format&q=80'},
+        {name:'Taza con asa esculpida',desc:'Asa trabajada por separado. Unión perfecta tras el horneado.',img:'https://images.unsplash.com/photo-1588072432836-e10032774350?w=400&h=540&fit=crop&auto=format&q=80'}
+    ];
 
     function getMenu(){return MENUS[weekNum()%MENUS.length];}
     function getPlans(){return shuffle(MADPLANS,seedFromDate('mp'+weekNum())+33).slice(0,5);}
-    function getPottery(){return shuffle(POTTERY,seedFromDate('pt'+weekNum())+99).slice(0,4);}
 
-    function renderMenu(){
-        var m=getMenu();
-        document.getElementById('menu-week-label').textContent='Semana '+(weekNum()%MENUS.length+1)+' de '+MENUS.length;
-        document.getElementById('menu-container').innerHTML=m.map(function(day,i){return'<div class="menu-day a-up" style="animation-delay:'+(i*0.04)+'s"><div class="menu-day-header" style="background:var(--primary-soft);color:var(--primary)">'+day.d+'</div><div class="menu-row"><div class="menu-cell"><p class="text-xs font-semibold">🌅</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.D+'</p></div><div class="menu-cell"><p class="text-xs font-semibold">☀️</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.C+'</p></div><div class="menu-cell"><p class="text-xs font-semibold">🌙</p><p class="text-xs mt-0.5" style="color:var(--soft)">'+day.N+'</p></div></div></div>';}).join('');
+    var pSeed = 0;
+    function getPottery(force){
+        if(force) pSeed = Math.floor(Math.random()*9999);
+        var s = pSeed || seedFromDate('pt'+weekNum())+99;
+        return shuffle(POTTERY,s).slice(0,8);
     }
-
-    function renderPlans(){
-        var p=getPlans();
-        document.getElementById('plans-container').innerHTML=p.map(function(x,i){return'<div class="place-card a-up" style="animation-delay:'+(i*0.05)+'s"><div class="place-header"><div class="flex items-center justify-between flex-wrap gap-2 mb-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:'+(x.price==='Gratis'?'#ecfdf5':'#fef9ef')+';color:'+(x.price==='Gratis'?'#059669':'#d97706')+'">'+x.price+'</span><span class="text-xs" style="color:var(--muted)">👶 '+x.age+'</span></div><h3 class="font-extrabold text-lg">'+x.name+'</h3><div class="flex flex-wrap gap-2 mt-1"><span class="text-xs" style="color:var(--muted)">📍 '+x.zone+'</span><span class="text-xs" style="color:var(--muted)">🕐 '+x.horario+'</span></div></div><div class="place-body"><p class="text-sm mb-3" style="color:var(--soft)">'+x.desc+'</p><div style="background:#eff6ff;border-radius:12px;padding:0.7rem 1rem"><p class="text-xs" style="color:#2563eb"><strong>💡</strong> '+x.tips+'</p></div></div></div>';}).join('');
-    }
-
-    function renderPottery(){
-        var pt=getPottery();
-        document.getElementById('pottery-container').innerHTML=pt.map(function(x,i){return'<div class="pottery-card a-up" style="animation-delay:'+(i*0.06)+'s"><img src="'+x.img+'" alt="'+x.name+'" class="pottery-img" loading="lazy"><div class="pottery-body"><h3 class="font-extrabold text-lg mb-1">'+x.name+'</h3><p class="text-sm" style="color:var(--soft)">'+x.desc+'</p></div></div>';}).join('');
+    function renderPottery(force){
+        var pt = getPottery(force);
+        var boards = [
+            {label:'vanesaduarte · cerámica aesthetic',url:'https://ar.pinterest.com/vanesaduarte/ceramica-aesthetic/'},
+            {label:'malakyasserrr · pottery aesthetic',url:'https://es.pinterest.com/malakyasserrr/pottery-aesthetic/'},
+            {label:'ideas cerámica aesthetic',url:'https://es.pinterest.com/ideas/ideas-de-ceramica-aesthetic/899073442079/'}
+        ];
+        document.getElementById('pottery-container').innerHTML =
+            '<div style="columns:2;column-gap:0.65rem">' +
+            pt.map(function(x,i){
+                return '<div class="a-up" style="break-inside:avoid;margin-bottom:0.65rem;animation-delay:'+(i*0.04)+'s;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:var(--surface)">' +
+                    '<img src="'+x.img+'" alt="'+x.name+'" loading="lazy" style="width:100%;display:block">' +
+                    '<div style="padding:0.55rem 0.7rem 0.65rem">' +
+                    '<p style="font-weight:700;font-size:0.78rem;color:var(--ink);line-height:1.3">'+x.name+'</p>' +
+                    '<p style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;line-height:1.4">'+x.desc+'</p>' +
+                    '</div></div>';
+            }).join('') +
+            '</div>' +
+            '<button onclick="renderPottery(true)" class="btn btn-outline" style="margin-top:0.5rem;font-size:0.82rem">🔀 Ver otras piezas</button>' +
+            '<div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem">' +
+            '<p class="label" style="margin-bottom:0.6rem">📌 Fuente · Pinterest</p>' +
+            boards.map(function(b){
+                return '<a href="'+b.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.85rem;border-radius:12px;border:1px solid var(--border);margin-bottom:0.45rem;text-decoration:none;background:var(--surface)">' +
+                    '<span style="font-size:1rem">📌</span>' +
+                    '<span style="font-size:0.78rem;font-weight:600;color:var(--ink);flex:1">'+b.label+'</span>' +
+                    '<span style="color:var(--muted);font-size:0.75rem">→</span>' +
+                    '</a>';
+            }).join('') +
+            '</div>';
     }
 
     // ===== UTILS =====
