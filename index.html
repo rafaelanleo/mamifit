@@ -55,6 +55,7 @@
         .ex-icon { width:40px; height:40px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.2rem; background:var(--primary-soft); }
         .ex-num { font-weight:700; font-size:0.75rem; color:var(--primary); width:22px; text-align:center; flex-shrink:0; }
         .ex-info { flex:1; min-width:0; }
+        .ex-pat { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); }
         .ex-reps { font-weight:700; font-size:0.78rem; color:var(--accent); flex-shrink:0; white-space:nowrap; }
         .ex-chev { font-size:0.45rem; color:#c4b8d0; transition:0.3s; flex-shrink:0; }
         .ex-card.open .ex-chev { transform:rotate(180deg); color:var(--primary); }
@@ -62,12 +63,16 @@
         .ex-check.done { background:var(--success); border-color:var(--success); color:#fff; }
         .ex-body { max-height:0; overflow:hidden; transition:max-height 0.4s cubic-bezier(0.16,1,0.3,1); border-top:1px solid transparent; }
         .ex-card.open .ex-body { max-height:380px; border-color:var(--border); }
-        .ex-vid { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; margin:0.5rem 0.9rem; border-radius:10px; background:#0f0a1a; }
-        .ex-vid iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; border-radius:10px; }
+
         .ex-tip { padding:0.1rem 0.9rem 0.8rem; font-size:0.78rem; color:var(--soft); line-height:1.5; }
 
         .prog-track { height:4px; background:#ede4f5; border-radius:4px; overflow:hidden; }
         .prog-track .fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:4px; transition:width 0.5s cubic-bezier(0.16,1,0.3,1); }
+
+        .meso { display:flex; gap:0.3rem; }
+        .meso-seg { flex:1; height:6px; border-radius:6px; background:#ede4f5; transition:all 0.4s; }
+        .meso-seg.done { background:linear-gradient(90deg,var(--primary),var(--accent)); }
+        .meso-seg.current { background:var(--warm); box-shadow:0 0 0 2px rgba(245,158,11,0.2); }
 
         .timer-ring { width:155px; height:155px; border-radius:50%; border:4px solid #ede4f5; display:flex; align-items:center; justify-content:center; margin:0 auto; transition:border-color 0.5s; background:radial-gradient(circle,#fdfbff 60%,#f5f0ff 100%); }
         .timer-ring .tnum { font-size:2.1rem; font-weight:700; letter-spacing:-0.03em; color:var(--ink); }
@@ -150,13 +155,13 @@
 <section id="screen-routine" class="screen"><div class="scroll-area">
     <button class="btn btn-ghost" onclick="navTo('screen-home')">← Inicio</button>
     <div class="card"><div class="flex items-center justify-between flex-wrap gap-2"><div><h2 class="text-xl font-extrabold" id="rnm">Rutina de hoy</h2><span class="inline-block mt-1.5 px-3 py-0.5 rounded-full text-xs font-bold text-white" id="rbadge">Base</span></div><span class="text-sm font-medium" style="color:var(--muted)">⏱ 20 min</span></div></div>
+    <div class="card"><div class="flex items-center justify-between mb-2"><p class="label">Mesociclo · 4 semanas</p><p class="text-xs font-bold" id="meso-lbl" style="color:var(--warm)"></p></div><div class="meso" id="meso"></div><p class="text-xs mt-2" id="meso-desc" style="color:var(--muted)"></p></div>
     <div class="card flex items-center justify-between"><div><p class="font-semibold text-sm">👶 Modo con peques</p><p class="text-xs" style="color:var(--muted)">Añade un bloque lúdico</p></div><div class="toggle" id="kidstg" onclick="toggleKids()"><div class="knob"></div></div></div>
     <div class="flex flex-wrap gap-2" id="chips"><button class="chip active" data-lvl="base" onclick="setLvl('base',this)">Base</button><button class="chip" data-lvl="intermedio" onclick="setLvl('intermedio',this)">Intermedio</button><button class="chip" data-lvl="suave" onclick="setLvl('suave',this)">Día suave</button></div>
     <div class="flex items-center justify-between"><p class="label">Progreso</p><p class="text-xs font-medium" style="color:var(--muted)"><span id="dn">0</span>/<span id="tn">0</span></p></div>
     <div class="prog-track"><div class="fill" id="progf" style="width:0%"></div></div>
-    <div class="card" id="exb"><p class="label">Ejercicios</p><div class="space-y-2 mt-2" id="bcont"></div></div>
+    <div class="card" id="exb"><p class="label">Ejercicios de hoy</p><div class="space-y-2 mt-2" id="bcont"></div></div>
     <div class="card text-center"><p class="label">Temporizador</p><div class="timer-ring mt-3" id="timer"><span class="tnum">20:00</span></div><div class="mt-4 flex gap-3 justify-center"><button class="btn btn-primary" style="width:auto" id="tbtn" onclick="toggleTimer()">▶ Iniciar</button><button class="btn btn-outline text-sm" style="width:auto" onclick="resetTimer()">↺ Reiniciar</button></div></div>
-    <button class="btn btn-outline" onclick="newR()">🔄 Quiero otra rutina</button>
     <button class="btn btn-primary" id="doneb" style="display:none" onclick="complete()">✓ Completar rutina</button>
 </div></section>
 
@@ -233,6 +238,7 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
         profile: JSON.parse(localStorage.getItem('mfprofile')||'null')||{},
         weightLog: JSON.parse(localStorage.getItem('mfweight')||'[]')
     };
+    var currentSession = [];
     var sv = function(k,v){localStorage.setItem('mf'+k,JSON.stringify(v));};
     var td = function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
     var bk = function(l,i){return l+'_'+i;};
@@ -242,19 +248,157 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
     function sPick(a,s){return a[Math.floor(sRnd(s)*a.length)];}
     function shuffle(a,s){var r=a.slice();for(var i=r.length-1;i>0;i--){var j=Math.floor(sRnd(s+i)*(i+1));var t=r[i];r[i]=r[j];r[j]=t;}return r;}
     function weekNum(){var now=new Date();var start=new Date(now.getFullYear(),0,1);var diff=now-start+(start.getTimezoneOffset()-now.getTimezoneOffset())*60000;return Math.floor(diff/604800000);}
+    function dayOfYear(){var n=new Date();var s=new Date(n.getFullYear(),0,0);var diff=n-s+(s.getTimezoneOffset()-n.getTimezoneOffset())*60000;return Math.floor(diff/86400000);}
 
-    var VID = {'Sentadillas asistidas':'RoyfbpR5nmA','Sentadillas completas':'RoyfbpR5nmA','Sentadillas a silla':'RoyfbpR5nmA','Flexiones en pared':'YB0egDzsu18','Flexiones de rodillas':'IODxDxXOCBU','Plancha de rodillas':'sKR9LozSZvE','Plancha completa':'sKR9LozSZvE','Zancadas suaves':'ASdqJoDPMHA','Zancadas alternas':'ASdqJoDPMHA','Puente de glúteos':'OUgsJj8Pmv0','Puente a una pierna':'VUl8R0kn6v4','Escaladores':'ixxk9Qfn61o','Estiramiento final':'3N_8ioZ4jdk','Movilidad articular':'yIOrimclYDc','Estiramiento gato-vaca':'xyNwxiuERXc','Círculos de brazos':'yIOrimclYDc','Balanceo de piernas':'yIOrimclYDc','Respiración diafragmática':'9jpchJcKivk','🐸 Saltos de rana con peques':'hZb6jTbCLeE'};
-    var IC = {squat:'🧘',pushup:'💪',plank:'🎯',lunge:'🚶',bridge:'🍑',stretch:'🧘',mobility:'🌀',breathing:'🌬️'};
-    var EX = {base:[{n:'Sentadillas asistidas',r:'3×10',d:'Apóyate en una silla',t:'Pies ancho hombros. Pecho arriba.',ik:'squat'},{n:'Flexiones en pared',r:'3×10',d:'Empuja contra la pared',t:'Manos altura pecho.',ik:'pushup'},{n:'Plancha de rodillas',r:'3×20"',d:'Rodillas apoyadas, abdomen firme',t:'Codos bajo hombros.',ik:'plank'},{n:'Zancadas suaves',r:'2×8/lado',d:'Paso corto, sin prisas',t:'Rodilla no sobrepasa punta pie.',ik:'lunge'},{n:'Puente de glúteos',r:'3×12',d:'Boca arriba, eleva cadera',t:'Talones apoyados.',ik:'bridge'},{n:'Estiramiento final',r:'3 min',d:'Respira y estira el cuerpo',t:'Sin rebotes. 20-30s.',ik:'stretch'}],intermedio:[{n:'Sentadillas completas',r:'4×12',d:'Muslos paralelos al suelo',t:'Inspira al bajar.',ik:'squat'},{n:'Flexiones de rodillas',r:'4×8-10',d:'Pecho al suelo desde rodillas',t:'Codos 45°.',ik:'pushup'},{n:'Plancha completa',r:'3×30"',d:'Cuerpo recto en puntas',t:'Línea recta.',ik:'plank'},{n:'Zancadas alternas',r:'3×10/lado',d:'Paso amplio controlado',t:'Rodilla 90°.',ik:'lunge'},{n:'Escaladores',r:'3×20"',d:'Rodillas al pecho en plancha',t:'Caderas bajas.',ik:'plank'},{n:'Puente a una pierna',r:'3×8/lado',d:'Una pierna elevada',t:'Empuja con talón.',ik:'bridge'},{n:'Estiramiento final',r:'3 min',d:'Estiramientos profundos',t:'30s por grupo.',ik:'stretch'}],suave:[{n:'Movilidad articular',r:'3 min',d:'Rota articulaciones suave',t:'Círculos suaves.',ik:'mobility'},{n:'Sentadillas a silla',r:'2×8',d:'Siéntate y levántate',t:'Controla la bajada.',ik:'squat'},{n:'Estiramiento gato-vaca',r:'2×8',d:'Arquea y redondea espalda',t:'Inspira al arquear.',ik:'stretch'},{n:'Círculos de brazos',r:'2×30"',d:'Brazos en cruz, círculos',t:'Nota calor hombros.',ik:'stretch'},{n:'Balanceo de piernas',r:'2×10/lado',d:'Balancea adelante-atrás',t:'Apóyate. Sin forzar.',ik:'lunge'},{n:'Respiración diafragmática',r:'3 min',d:'Tumbada, respira profundo',t:'Inhala 4s, exhala 6s.',ik:'breathing'}]};
-    var KIDB = {n:'🐸 Saltos de rana con peques',r:'2 min',d:'Salta como ranita',t:'Diversión pura. ¡Risas!',ik:'squat'};
+    var IC = {squat:'🦵',pushup:'💪',plank:'🎯',lunge:'🚶',bridge:'🍑',stretch:'🧘',mobility:'🌀',breathing:'🌬️',cardio:'🔥'};
+
+    // ===== POOLS DE EJERCICIOS (por patrón de movimiento) =====
+    // unit: reps | rep_side | sec | min   ·   base = valor de la semana 1   ·   v = id de vídeo YouTube
+    var POOLS = {
+        base: {
+            rodilla: [
+                {n:'Sentadillas asistidas',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:10,sets:3,d:'Apóyate en una silla',t:'Pies al ancho de hombros, pecho arriba.'},
+                {n:'Sentadillas a silla',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:8,sets:3,d:'Siéntate y levántate',t:'Controla la bajada, no te dejes caer.'},
+                {n:'Sentadilla sumo',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:10,sets:3,d:'Pies abiertos, puntas hacia fuera',t:'Rodillas en línea con las puntas.'}
+            ],
+            empuje: [
+                {n:'Flexiones en pared',ik:'pushup',v:'YB0egDzsu18',unit:'reps',base:10,sets:3,d:'Empuja contra la pared',t:'Manos a la altura del pecho.'},
+                {n:'Flexiones inclinadas',ik:'pushup',v:'IODxDxXOCBU',unit:'reps',base:8,sets:3,d:'Manos en una mesa firme',t:'Cuerpo recto, baja el pecho.'},
+                {n:'Flexiones de rodillas',ik:'pushup',v:'IODxDxXOCBU',unit:'reps',base:8,sets:3,d:'Pecho al suelo desde rodillas',t:'Codos a 45°.'}
+            ],
+            cadera: [
+                {n:'Puente de glúteos',ik:'bridge',v:'OUgsJj8Pmv0',unit:'reps',base:12,sets:3,d:'Boca arriba, eleva la cadera',t:'Talones apoyados, aprieta arriba.'},
+                {n:'Puente con pausa',ik:'bridge',v:'OUgsJj8Pmv0',unit:'reps',base:10,sets:3,d:'Aguanta 2s arriba',t:'No arquees la zona lumbar.'},
+                {n:'Marcha de glúteo',ik:'bridge',v:'VUl8R0kn6v4',unit:'rep_side',base:8,sets:3,d:'En puente, eleva una rodilla',t:'Cadera estable, sin caer.'}
+            ],
+            unilateral: [
+                {n:'Zancadas suaves',ik:'lunge',v:'ASdqJoDPMHA',unit:'rep_side',base:8,sets:2,d:'Paso corto, sin prisa',t:'Rodilla no pasa la punta del pie.'},
+                {n:'Zancada estática',ik:'lunge',v:'ASdqJoDPMHA',unit:'rep_side',base:8,sets:2,d:'Sin mover el pie, sube y baja',t:'Tronco erguido.'},
+                {n:'Subida a escalón',ik:'lunge',v:'ASdqJoDPMHA',unit:'rep_side',base:8,sets:2,d:'Sube a un escalón firme',t:'Empuja con el talón de arriba.'}
+            ],
+            core: [
+                {n:'Plancha de rodillas',ik:'plank',v:'sKR9LozSZvE',unit:'sec',base:20,sets:3,d:'Rodillas apoyadas, abdomen firme',t:'Codos bajo los hombros.'},
+                {n:'Plancha en mesa',ik:'plank',v:'sKR9LozSZvE',unit:'sec',base:25,sets:3,d:'Antebrazos sobre una mesa',t:'Cuerpo en línea recta.'},
+                {n:'Bird-dog',ik:'plank',v:'xyNwxiuERXc',unit:'rep_side',base:8,sets:2,d:'En cuadrupedia, brazo y pierna opuestos',t:'Sin balanceo de cadera.'}
+            ]
+        },
+        intermedio: {
+            rodilla: [
+                {n:'Sentadillas completas',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:12,sets:4,d:'Muslos paralelos al suelo',t:'Inspira al bajar.'},
+                {n:'Sentadilla sumo',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:12,sets:3,d:'Pies abiertos, baja entre las piernas',t:'Pecho alto.'},
+                {n:'Sentadilla con salto suave',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:10,sets:3,d:'Sube con un pequeño salto',t:'Aterriza con rodillas blandas.'}
+            ],
+            empuje: [
+                {n:'Flexiones de rodillas',ik:'pushup',v:'IODxDxXOCBU',unit:'reps',base:10,sets:4,d:'Pecho al suelo desde rodillas',t:'Codos a 45°.'},
+                {n:'Flexiones completas',ik:'pushup',v:'IODxDxXOCBU',unit:'reps',base:6,sets:3,d:'En puntas, cuerpo recto',t:'No hundas la cadera.'},
+                {n:'Flexiones diamante',ik:'pushup',v:'IODxDxXOCBU',unit:'reps',base:8,sets:3,d:'Manos juntas bajo el pecho',t:'Trabaja el tríceps.'}
+            ],
+            cadera: [
+                {n:'Puente a una pierna',ik:'bridge',v:'VUl8R0kn6v4',unit:'rep_side',base:8,sets:3,d:'Una pierna estirada, eleva cadera',t:'Empuja con el talón.'},
+                {n:'Puente elevado',ik:'bridge',v:'OUgsJj8Pmv0',unit:'reps',base:15,sets:3,d:'Pies sobre un escalón bajo',t:'Mayor recorrido.'},
+                {n:'Peso muerto a una pierna',ik:'bridge',v:'VUl8R0kn6v4',unit:'rep_side',base:8,sets:3,d:'Sin peso, baja el tronco y sube',t:'Espalda recta, mira al suelo.'}
+            ],
+            unilateral: [
+                {n:'Zancadas alternas',ik:'lunge',v:'ASdqJoDPMHA',unit:'rep_side',base:10,sets:3,d:'Paso amplio y controlado',t:'Rodilla a 90°.'},
+                {n:'Zancadas atrás',ik:'lunge',v:'ASdqJoDPMHA',unit:'rep_side',base:10,sets:3,d:'Da el paso hacia atrás',t:'Más amable con la rodilla.'},
+                {n:'Zancada búlgara suave',ik:'lunge',v:'ASdqJoDPMHA',unit:'rep_side',base:8,sets:3,d:'Pie trasero en una silla baja',t:'El peso, en la pierna delantera.'}
+            ],
+            core: [
+                {n:'Plancha completa',ik:'plank',v:'sKR9LozSZvE',unit:'sec',base:30,sets:3,d:'En puntas, cuerpo recto',t:'Línea recta cabeza-talones.'},
+                {n:'Plancha con toque de hombro',ik:'plank',v:'sKR9LozSZvE',unit:'sec',base:25,sets:3,d:'Toca el hombro contrario',t:'Cadera estable, sin girar.'},
+                {n:'Bird-dog',ik:'plank',v:'xyNwxiuERXc',unit:'rep_side',base:10,sets:3,d:'Brazo y pierna opuestos',t:'Control, sin prisa.'}
+            ],
+            cardio: [
+                {n:'Escaladores',ik:'cardio',v:'ixxk9Qfn61o',unit:'sec',base:20,sets:3,d:'Rodillas al pecho en plancha',t:'Caderas bajas.'},
+                {n:'Rodillas al pecho en marcha',ik:'cardio',v:'ixxk9Qfn61o',unit:'sec',base:30,sets:2,d:'En el sitio, sube las rodillas',t:'Ritmo cómodo, respira.'},
+                {n:'Jumping jacks suaves',ik:'cardio',v:'ixxk9Qfn61o',unit:'sec',base:25,sets:3,d:'Abre y cierra brazos y piernas',t:'Aterriza suave.'}
+            ]
+        },
+        suave: {
+            movilidad: [
+                {n:'Movilidad articular',ik:'mobility',v:'yIOrimclYDc',unit:'min',base:3,sets:1,d:'Rota todas las articulaciones',t:'Círculos lentos y amplios.'},
+                {n:'Círculos de brazos',ik:'mobility',v:'yIOrimclYDc',unit:'sec',base:30,sets:2,d:'Brazos en cruz, círculos',t:'Nota el calor en los hombros.'},
+                {n:'Rotaciones de cadera',ik:'mobility',v:'yIOrimclYDc',unit:'sec',base:30,sets:2,d:'Manos en la cadera, círculos',t:'Pies firmes en el suelo.'}
+            ],
+            rodilla: [
+                {n:'Sentadillas a silla',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:8,sets:2,d:'Siéntate y levántate',t:'Controla la bajada.'},
+                {n:'Sentadilla parcial',ik:'squat',v:'RoyfbpR5nmA',unit:'reps',base:8,sets:2,d:'Baja solo un cuarto',t:'Sin forzar la rodilla.'}
+            ],
+            cadera: [
+                {n:'Puente de glúteos suave',ik:'bridge',v:'OUgsJj8Pmv0',unit:'reps',base:10,sets:2,d:'Eleva la cadera sin prisa',t:'Aprieta arriba 1s.'},
+                {n:'Elevación de cadera con pausa',ik:'bridge',v:'OUgsJj8Pmv0',unit:'reps',base:8,sets:2,d:'Aguanta 2s arriba',t:'Respira durante la pausa.'}
+            ],
+            columna: [
+                {n:'Estiramiento gato-vaca',ik:'stretch',v:'xyNwxiuERXc',unit:'reps',base:8,sets:2,d:'Arquea y redondea la espalda',t:'Inspira al arquear.'},
+                {n:'Balanceo de piernas',ik:'lunge',v:'yIOrimclYDc',unit:'rep_side',base:10,sets:2,d:'Balancea adelante y atrás',t:'Apóyate, sin forzar.'},
+                {n:'Torsión suave sentada',ik:'stretch',v:'xyNwxiuERXc',unit:'rep_side',base:6,sets:2,d:'Sentada, gira el tronco',t:'Acompaña con la mirada.'}
+            ]
+        }
+    };
+
+    // Patrones que componen la sesión (en orden) por nivel
+    var ORDER = {
+        base: ['rodilla','empuje','cadera','unilateral','core'],
+        intermedio: ['rodilla','empuje','cadera','unilateral','core','cardio'],
+        suave: ['movilidad','rodilla','cadera','columna']
+    };
+    var PATLBL = {rodilla:'Piernas',empuje:'Empuje',cadera:'Glúteo',unilateral:'Unilateral',core:'Core',cardio:'Cardio',movilidad:'Movilidad',columna:'Columna',cierre:'Cierre'};
+
+    // Bloque de cierre (siempre el último)
+    var CIERRE = {
+        base: [
+            {n:'Estiramiento final',ik:'stretch',v:'3N_8ioZ4jdk',unit:'min',base:3,sets:1,d:'Respira y estira el cuerpo',t:'Sin rebotes, 20-30s por músculo.'},
+            {n:'Respiración diafragmática',ik:'breathing',v:'9jpchJcKivk',unit:'min',base:3,sets:1,d:'Tumbada, respira profundo',t:'Inhala 4s, exhala 6s.'},
+            {n:'Estiramiento gato-vaca',ik:'stretch',v:'xyNwxiuERXc',unit:'min',base:3,sets:1,d:'Arquea y redondea la espalda',t:'Acompaña con la respiración.'}
+        ]
+    };
+    CIERRE.intermedio = CIERRE.base;
+    CIERRE.suave = [
+        {n:'Respiración diafragmática',ik:'breathing',v:'9jpchJcKivk',unit:'min',base:3,sets:1,d:'Tumbada, respira profundo',t:'Inhala 4s, exhala 6s.'},
+        {n:'Estiramiento final',ik:'stretch',v:'3N_8ioZ4jdk',unit:'min',base:3,sets:1,d:'Respira y estira el cuerpo',t:'Sin rebotes, 20-30s por músculo.'}
+    ];
+
+    var KIDB = {n:'🐸 Saltos de rana con peques',ik:'cardio',v:'hZb6jTbCLeE',unit:'min',base:2,sets:1,d:'Salta como una ranita',t:'Diversión pura. ¡A reír!'};
+
+    // Mesociclo de 4 semanas: 3 de carga ascendente + 1 de descarga
+    var WEEKF = [1.0, 1.12, 1.25, 0.85];
+    var WLAB  = ['Adaptación','Construcción','Pico','Descarga'];
+    var WDESC = ['Semana suave para coger el ritmo.','Subimos un poco el volumen.','Semana más exigente. ¡Dale!','Bajamos la carga para recuperar.'];
+
     var MOTS = ['"Cada gota de sudor es una carta de amor a tu cuerpo."','"No necesitas ser perfecta, solo constante."','"20 minutos para ti son el mejor regalo."','"Tu fuerza inspira a quienes te rodean."','"Hoy eliges cuidarte. Eso ya es ganar."','"Pequeños pasos, grandes cambios."','"La disciplina es amor propio."','"Mujeres que se mueven, transforman."'];
     var RNM = {base:['Energía suave','Fuerza inicial','Paso a paso'],intermedio:['Potencia total','Fuego interior','Ritmo fuerte'],suave:['Fluye con calma','Respiro consciente','Cuerpo presente']};
+
+    function scaleVal(base,unit,f){
+        if(unit==='sec'){var v=Math.round(base*f/5)*5;return Math.max(10,v);}
+        if(unit==='reps'||unit==='rep_side'){return Math.max(5,Math.round(base*f));}
+        return base;
+    }
+    function repStr(ex,f){
+        if(ex.unit==='min')return ex.base+' min';
+        var v=scaleVal(ex.base,ex.unit,f);
+        if(ex.unit==='sec')return ex.sets+'×'+v+'"';
+        if(ex.unit==='rep_side')return ex.sets+'×'+v+'/lado';
+        return ex.sets+'×'+v;
+    }
+    function buildSession(lvl,kids){
+        var doy=dayOfYear(), wc=weekNum()%4, f=WEEKF[wc];
+        var order=ORDER[lvl]||ORDER.base, pools=POOLS[lvl]||POOLS.base, sess=[];
+        order.forEach(function(pat,pi){
+            var pool=pools[pat]; if(!pool||!pool.length)return;
+            var ex=pool[(doy+pi)%pool.length];
+            sess.push({n:ex.n,d:ex.d,t:ex.t,ik:ex.ik,v:ex.v,pat:PATLBL[pat]||'',r:repStr(ex,f)});
+        });
+        if(kids)sess.push({n:KIDB.n,d:KIDB.d,t:KIDB.t,ik:KIDB.ik,v:KIDB.v,pat:'Peques',r:repStr(KIDB,1)});
+        var cp=CIERRE[lvl]||CIERRE.base, c=cp[doy%cp.length];
+        sess.push({n:c.n,d:c.d,t:c.t,ik:c.ik,v:c.v,pat:'Cierre',r:repStr(c,1)});
+        return sess;
+    }
 
     // MENU DATA
     var MENUS = [[{d:'Lunes',D:'🥣 Porridge de avena con plátano',C:'🥗 Quinoa, aguacate y pollo',N:'🍲 Crema de calabaza'},{d:'Martes',D:'🥑 Tostada con aguacate y huevo',C:'🐟 Salmón al horno con brócoli',N:'🥬 Revuelto de espárragos'},{d:'Miércoles',D:'🍓 Yogur con granola y frutos rojos',C:'🍛 Pollo al curry con arroz integral',N:'🥣 Gazpacho con huevo duro'},{d:'Jueves',D:'🥞 Tortitas de avena y plátano',C:'🥙 Garbanzos, calabacín y menta',N:'🍆 Berenjena rellena de verduras'},{d:'Viernes',D:'🍌 Smoothie verde detox',C:'🍣 Wok de verduras y tofu',N:'🍕 Pizza con base de coliflor'},{d:'Sábado',D:'🥚 Revuelto de huevos con tomate',C:'🥩 Pollo a la plancha con ensalada',N:'🥗 Ensalada de lentejas'},{d:'Domingo',D:'🧇 Overnight oats de chía y cacao',C:'🥘 Lentejas estofadas',N:'🍵 Crema de zanahoria'}],[{d:'Lunes',D:'🍞 Tostada integral con tomate',C:'🥗 Ensalada de pasta con atún',N:'🥦 Brócoli gratinado'},{d:'Martes',D:'🥤 Batido de plátano y canela',C:'🍗 Muslos de pollo asados',N:'🥒 Crema de pepino'},{d:'Miércoles',D:'🍳 Tortilla con espinacas',C:'🐟 Merluza a la plancha',N:'🥬 Ensalada de garbanzos'},{d:'Jueves',D:'🥜 Tostada con crema de cacahuete',C:'🥙 Wrap de pavo y verduras',N:'🍜 Sopa de fideos'},{d:'Viernes',D:'🍎 Yogur con manzana asada',C:'🍣 Sushi bowl de salmón',N:'🥘 Tortilla de calabacín'},{d:'Sábado',D:'🥞 Crepes integrales con fruta',C:'🍔 Hamburguesa de pollo casera',N:'🥗 Ensalada caprese'},{d:'Domingo',D:'🥣 Porridge con frutos secos',C:'🥩 Ternera guisada',N:'🍵 Puré de verduras'}],[{d:'Lunes',D:'🍞 Pan integral con hummus',C:'🥗 Ensalada de arroz salvaje',N:'🥣 Sopa minestrone'},{d:'Martes',D:'🥚 Huevos revueltos con champiñones',C:'🐟 Sardinas a la plancha',N:'🥦 Coliflor al horno'},{d:'Miércoles',D:'🥣 Muesli con leche y fruta',C:'🍛 Lentejas al curry',N:'🥒 Crema de calabacín'},{d:'Jueves',D:'🍌 Yogur con plátano y nueces',C:'🍗 Pechuga de pollo rellena',N:'🥬 Ensalada de espinacas'},{d:'Viernes',D:'🥤 Smoothie de mango',C:'🍣 Bowl de arroz con salmón',N:'🥘 Revuelto de setas'},{d:'Sábado',D:'🥐 Tostada francesa integral',C:'🥙 Falafel con ensalada',N:'🍆 Pisto manchego'},{d:'Domingo',D:'🥞 Tortitas de calabaza',C:'🥘 Paella integral',N:'🍵 Crema de puerros'}],[{d:'Lunes',D:'🍞 Tostada con aguacate',C:'🥗 Ensalada tibia de patata',N:'🥣 Puré de calabacín'},{d:'Martes',D:'🥣 Gachas de avena con compota',C:'🐟 Bacalao al horno',N:'🥬 Tortilla de acelgas'},{d:'Miércoles',D:'🍳 Huevo poché con espárragos',C:'🍛 Garbanzos con espinacas',N:'🥒 Gazpacho verde'},{d:'Jueves',D:'🥜 Bowl de kéfir y granola',C:'🍗 Pollo teriyaki con arroz',N:'🍜 Sopa de miso'},{d:'Viernes',D:'🍞 Pan con tomate y jamón',C:'🥙 Ensalada de bulgur',N:'🍕 Mini pizzas de berenjena'},{d:'Sábado',D:'🥣 Smoothie bowl de frutos rojos',C:'🍔 Hamburguesa de lentejas',N:'🥗 Ensalada de pasta'},{d:'Domingo',D:'🥞 Panqueques de avena',C:'🥘 Arroz caldoso',N:'🥣 Crema de espárragos'}]];
 
     // MADRID DATA
-    var MADPLANS = [{name:'Teatro de Títeres del Retiro',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Funciones de títeres y marionetas al aire libre todos los findes. Los niños se sientan en el césped y alucinan. Un clásico que nunca falla.',tips:'Llega 15 min antes. Puerta de la Independencia. Lleva algo para sentarte.',horario:'Sábados y domingos 12:30'},{name:'Parque de El Capricho',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Uno de los jardines más bellos y desconocidos. Laberintos, grutas, estanques y un palacete. Solo abre fines de semana. Una joya secreta.',tips:'Solo findes y festivos. No pelotas ni bicis. Muy tranquilo. Lleva picnic.',horario:'Findes 9-21h'},{name:'Templo de Debod + picnic',zone:'Plaza España',price:'Gratis',age:'3-10 años',desc:'Templo egipcio de más de 2200 años en pleno centro. Los niños flipan. Jardines perfectos para picnic con las mejores vistas de Madrid.',tips:'Cola para entrar. Atardecer mágico. Mejor entre semana.',horario:'Mar-Dom 10-20h'},{name:'Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Almendros en flor (feb-mar), laberintos vegetales, estanques con patos. Espectáculo rosa en primavera. Parque secreto precioso.',tips:'Imprescindible en floración. Metro Suanzes L5.',horario:'Abierto todo el año'},{name:'Madrid Río: toboganes XXL',zone:'Arganzuela',price:'Gratis',age:'2-10 años',desc:'17 áreas de juego con toboganes gigantes, tirolinas y zona de agua. Kilómetros de parque junto al Manzanares.',tips:'Zona Puente del Rey = mejores toboganes. Lleva patinete.',horario:'Siempre abierto'},{name:'Cerro del Tío Pío',zone:'Vallecas',price:'Gratis',age:'2-10 años',desc:'Colinas verdes con las mejores vistas de Madrid. Para volar cometas, rodar por el césped y ver atardeceres brutales.',tips:'Al atardecer es increíble. Lleva cometa. Poca sombra.',horario:'Siempre abierto'},{name:'Cambio de Guardia Real',zone:'Centro',price:'Gratis',age:'4-10 años',desc:'Desfile de soldados con uniformes de época, caballos y música. Los niños se quedan con la boca abierta.',tips:'Miércoles y sábados 11h. Llega 20 min antes.',horario:'Miércoles y sábados'},{name:'Palacio de Cristal (Retiro)',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Palacio de cristal y hierro de 1887. Exposiciones de arte y patos en el estanque. Pura magia en medio del parque.',tips:'Entrada libre. Combínalo con paseo en barca.',horario:'Todos los días'},{name:'Parque Juan Carlos I',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Parque enorme sin masificar. Lago, olivos centenarios, esculturas. Ideal para bici o patinete sin aglomeraciones.',tips:'Alquiler de bicis en entrada. Día entero sin gente.',horario:'Siempre abierto'},{name:'Casa de Campo: lago y ardillas',zone:'Moncloa',price:'Gratis',age:'2-10 años',desc:'El parque más grande. Lago, merenderos y ardillas que comen de tu mano. Naturaleza pura a un metro de Gran Vía.',tips:'Lleva frutos secos sin sal. Merenderos tras pistas de tenis.',horario:'Siempre abierto'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres, teatro, títeres y cine los findes. Cafetería agradable y mucho espacio.',tips:'Consulta programación web. Metro Legazpi L3.',horario:'Findes'},{name:'Parque Felipe VI',zone:'Valdebebas',price:'Gratis',age:'3-10 años',desc:'Parque de aventura con toboganes metálicos gigantes, redes de escalada y tirolinas. Pura adrenalina para peques.',tips:'Mejor pantalón largo. Cercanías Valdebebas.',horario:'Siempre abierto'},{name:'Jardín Botánico',zone:'Atocha',price:'4€ adultos, niños gratis',age:'3-10 años',desc:'5000+ especies de plantas. Invernaderos, bonsáis centenarios y talleres familiares los fines de semana.',tips:'Niños gratis. Talleres findes. Metro Atocha.',horario:'Mar-Dom'},{name:'Museo Ciencias Naturales',zone:'Chamberí',price:'Gratis dom 17-20h',age:'4-10 años',desc:'Dinosaurios, minerales, meteoritos. El museo favorito de los niños. Gratis los domingos por la tarde.',tips:'Gratis domingos 17-20h. Sala dinosaurios brutal.',horario:'Mar-Dom'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres gratuitos, cuentacuentos y teatro. La Urbanoteca es un espacio de juego interior maravilloso.',tips:'Algunas actividades requieren inscripción.',horario:'Consultar web'}];
+    var MADPLANS = [{name:'Teatro de Títeres del Retiro',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Funciones de títeres y marionetas al aire libre todos los findes. Los niños se sientan en el césped y alucinan. Un clásico que nunca falla.',tips:'Llega 15 min antes. Puerta de la Independencia. Lleva algo para sentarte.',horario:'Sábados y domingos 12:30'},{name:'Parque de El Capricho',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Uno de los jardines más bellos y desconocidos. Laberintos, grutas, estanques y un palacete. Solo abre fines de semana. Una joya secreta.',tips:'Solo findes y festivos. No pelotas ni bicis. Muy tranquilo. Lleva picnic.',horario:'Findes 9-21h'},{name:'Templo de Debod + picnic',zone:'Plaza España',price:'Gratis',age:'3-10 años',desc:'Templo egipcio de más de 2200 años en pleno centro. Los niños flipan. Jardines perfectos para picnic con las mejores vistas de Madrid.',tips:'Cola para entrar. Atardecer mágico. Mejor entre semana.',horario:'Mar-Dom 10-20h'},{name:'Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Almendros en flor (feb-mar), laberintos vegetales, estanques con patos. Espectáculo rosa en primavera. Parque secreto precioso.',tips:'Imprescindible en floración. Metro Suanzes L5.',horario:'Abierto todo el año'},{name:'Madrid Río: toboganes XXL',zone:'Arganzuela',price:'Gratis',age:'2-10 años',desc:'17 áreas de juego con toboganes gigantes, tirolinas y zona de agua. Kilómetros de parque junto al Manzanares.',tips:'Zona Puente del Rey = mejores toboganes. Lleva patinete.',horario:'Siempre abierto'},{name:'Cerro del Tío Pío',zone:'Vallecas',price:'Gratis',age:'2-10 años',desc:'Colinas verdes con las mejores vistas de Madrid. Para volar cometas, rodar por el césped y ver atardeceres brutales.',tips:'Al atardecer es increíble. Lleva cometa. Poca sombra.',horario:'Siempre abierto'},{name:'Cambio de Guardia Real',zone:'Centro',price:'Gratis',age:'4-10 años',desc:'Desfile de soldados con uniformes de época, caballos y música. Los niños se quedan con la boca abierta.',tips:'Miércoles y sábados 11h. Llega 20 min antes.',horario:'Miércoles y sábados'},{name:'Palacio de Cristal (Retiro)',zone:'Retiro',price:'Gratis',age:'2-10 años',desc:'Palacio de cristal y hierro de 1887. Exposiciones de arte y patos en el estanque. Pura magia en medio del parque.',tips:'Entrada libre. Combínalo con paseo en barca.',horario:'Todos los días'},{name:'Parque Juan Carlos I',zone:'Barajas',price:'Gratis',age:'2-10 años',desc:'Parque enorme sin masificar. Lago, olivos centenarios, esculturas. Ideal para bici o patinete sin aglomeraciones.',tips:'Alquiler de bicis en entrada. Día entero sin gente.',horario:'Siempre abierto'},{name:'Casa de Campo: lago y ardillas',zone:'Moncloa',price:'Gratis',age:'2-10 años',desc:'El parque más grande. Lago, merenderos y ardillas que comen de tu mano. Naturaleza pura a un metro de Gran Vía.',tips:'Lleva frutos secos sin sal. Merenderos tras pistas de tenis.',horario:'Siempre abierto'},{name:'Matadero Madrid infantil',zone:'Legazpi',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres, teatro, títeres y cine los findes. Cafetería agradable y mucho espacio.',tips:'Consulta programación web. Metro Legazpi L3.',horario:'Findes'},{name:'Parque Felipe VI',zone:'Valdebebas',price:'Gratis',age:'3-10 años',desc:'Parque de aventura con toboganes metálicos gigantes, redes de escalada y tirolinas. Pura adrenalina para peques.',tips:'Mejor pantalón largo. Cercanías Valdebebas.',horario:'Siempre abierto'},{name:'Jardín Botánico',zone:'Atocha',price:'4€ adultos, niños gratis',age:'3-10 años',desc:'5000+ especies de plantas. Invernaderos, bonsáis centenarios y talleres familiares los fines de semana.',tips:'Niños gratis. Talleres findes. Metro Atocha.',horario:'Mar-Dom'},{name:'Museo Ciencias Naturales',zone:'Chamberí',price:'Gratis dom 17-20h',age:'4-10 años',desc:'Dinosaurios, minerales, meteoritos. El museo favorito de los niños. Gratis los domingos por la tarde.',tips:'Gratis domingos 17-20h. Sala dinosaurios brutal.',horario:'Mar-Dom'},{name:'Espacio Abierto Quinta de los Molinos',zone:'San Blas',price:'Gratis',age:'2-10 años',desc:'Centro cultural con talleres gratuitos, cuentacuentos y teatro. La Urbanoteca es un espacio de juego interior maravilloso.',tips:'Algunas actividades requieren inscripción.',horario:'Consultar web'}];
 
     // POTTERY DATA
     var POTTERY = [
@@ -329,8 +473,8 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
     function fd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
     function streak(){if(!S.sess.length)return 0;var s=S.sess.slice().sort().reverse();var c=0,t=td();if(s[0]===t){c=1;var d=new Date();d.setDate(d.getDate()-1);t=fd(d);}for(var i=(s[0]===td()?1:0);i<s.length;i++){if(s[i]===t){c++;var d2=new Date(t);d2.setDate(d2.getDate()-1);t=fd(d2);}else break;}return c;}
     function bestS(){if(!S.sess.length)return 0;var s=S.sess.slice().sort();var b=0,c=1;for(var i=1;i<s.length;i++){if(Math.round((new Date(s[i])-new Date(s[i-1]))/86400000)===1)c++;else{b=Math.max(b,c);c=1;}}return Math.max(b,c);}
-    function cntD(){var bl=EX[S.lvl].slice();if(S.kids)bl.push(KIDB);return bl.filter(function(_,i){return S.done[bk(S.lvl,i)];}).length;}
-    function cntT(){var bl=EX[S.lvl].slice();if(S.kids)bl.push(KIDB);return bl.length;}
+    function cntD(){return currentSession.filter(function(_,i){return S.done[bk(S.lvl,i)];}).length;}
+    function cntT(){return currentSession.length;}
 
     function confetti(){var cols=['#7c3aed','#f472b6','#f59e0b','#10b981','#a855f7'];for(var i=0;i<28;i++){setTimeout(function(){var el=document.createElement('div');el.className='confetti-piece';el.style.left=Math.random()*100+'%';el.style.top=(30+Math.random()*40)+'%';el.style.background=cols[Math.floor(Math.random()*cols.length)];el.style.width=(4+Math.random()*7)+'px';el.style.height=(4+Math.random()*7)+'px';el.style.animationDuration=(0.5+Math.random()*0.6)+'s';document.body.appendChild(el);setTimeout(function(){el.remove();},1000);},i*16);}}
 
@@ -358,24 +502,29 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
         var wk=wd(),tf=td();
         document.getElementById('cal-mini').innerHTML=wk.map(function(d,i){var df=fd(d),a=S.sess.includes(df),t=df===tf;return'<div class="dday'+(a?' filled':'')+(t?' today':'')+'">'+['L','M','X','J','V','S','D'][i]+'</div>';}).join('');
     }
+    function updMeso(){
+        var wc=weekNum()%4;
+        document.getElementById('meso-lbl').textContent='Semana '+(wc+1)+'/4 · '+WLAB[wc];
+        document.getElementById('meso-desc').textContent=WDESC[wc];
+        document.getElementById('meso').innerHTML=[0,1,2,3].map(function(i){var c='meso-seg';if(i<wc)c+=' done';if(i===wc)c+=' current';return'<div class="'+c+'"></div>';}).join('');
+    }
     function updR(){
         var l=S.lvl,k=S.kids;
         var bd=document.getElementById('rbadge');
         if(l==='base'){bd.textContent='Base';bd.style.background='#10b981';}
         else if(l==='intermedio'){bd.textContent='Intermedio';bd.style.background='#7c3aed';}
         else{bd.textContent='Día suave';bd.style.background='#f59e0b';}
-        var ds=seedFromDate(td());
-        document.getElementById('rnm').textContent=sPick(RNM[l],ds);
+        document.getElementById('rnm').textContent=sPick(RNM[l],seedFromDate(td()));
         document.querySelectorAll('#chips .chip').forEach(function(c){c.classList.toggle('active',c.dataset.lvl===l);});
         document.getElementById('kidstg').classList.toggle('on',k);
-        var base=EX[l].slice(),sh=shuffle(base,ds+100);
-        var last=sh.find(function(e){return e.n.includes('Estiramiento')||e.n.includes('Respiración')||e.n.includes('Movilidad');});
-        var rest=sh.filter(function(e){return e!==last;});
-        var bl=rest.slice();if(last)bl.push(last);if(k)bl.push(KIDB);
-        document.getElementById('bcont').innerHTML=bl.map(function(ex,i){var key=bk(l,i),isD=S.done[key]||false,vi=VID[ex.n]||'RoyfbpR5nmA';return'<div class="ex-card a-up" style="animation-delay:'+(i*0.02)+'s" data-key="'+key+'"><div class="ex-head" onclick="tc(this.parentElement,\''+key+'\')"><div class="ex-icon">'+(IC[ex.ik]||'💪')+'</div><span class="ex-num">'+(i+1)+'</span><div class="ex-info"><p class="font-semibold text-sm">'+ex.n+'</p><p class="text-xs" style="color:var(--muted)">'+ex.d+'</p></div><span class="ex-reps">'+ex.r+'</span><div class="ex-check'+(isD?' done':'')+'" onclick="event.stopPropagation();tdd(\''+key+'\')">✓</div><span class="ex-chev">▼</span></div><div class="ex-body"><div class="ex-vid"><iframe src="https://www.youtube.com/embed/'+vi+'?rel=0&modestbranding=1" title="Tutorial" allowfullscreen loading="lazy" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div><div class="ex-tip"><strong style="color:var(--primary)">💡</strong> '+ex.t+'</div></div></div>';}).join('');
+        updMeso();
+        currentSession=buildSession(l,k);
+
+        document.getElementById('bcont').innerHTML=currentSession.map(function(ex,i){var key=bk(l,i),isD=S.done[key]||false,vi=ex.v||'RoyfbpR5nmA',thumb='https://img.youtube.com/vi/'+vi+'/hqdefault.jpg',ytUrl='https://www.youtube.com/watch?v='+vi;return'<div class="ex-card a-up" style="animation-delay:'+(i*0.02)+'s" data-key="'+key+'"><div class="ex-head" onclick="tc(this.parentElement,\''+key+'\')"><div class="ex-icon">'+(IC[ex.ik]||'💪')+'</div><span class="ex-num">'+(i+1)+'</span><div class="ex-info"><p class="ex-pat">'+(ex.pat||'')+'</p><p class="font-semibold text-sm">'+ex.n+'</p><p class="text-xs" style="color:var(--muted)">'+ex.d+'</p></div><span class="ex-reps">'+ex.r+'</span><div class="ex-check'+(isD?' done':'')+'" onclick="event.stopPropagation();tdd(\''+key+'\')">✓</div><span class="ex-chev">▼</span></div><div class="ex-body"><a href="'+ytUrl+'" target="_blank" rel="noopener" style="display:block;position:relative;margin:0.6rem 0.9rem 0;border-radius:12px;overflow:hidden"><img src="'+thumb+'" loading="lazy" style="width:100%;display:block;border-radius:12px" onerror="this.parentElement.style.display=\'none\'"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);border-radius:12px"><div style="width:52px;height:52px;background:rgba(220,0,0,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.3)"><div style="width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:20px solid #fff;margin-left:5px"></div></div></div></a><div class="ex-tip" style="margin-top:0.6rem"><strong style="color:var(--primary)">💡</strong> '+ex.t+'</div></div></div>';}).join('');
         document.getElementById('dn').textContent=cntD();document.getElementById('tn').textContent=cntT();
         document.getElementById('progf').style.width=(cntT()>0?cntD()/cntT()*100:0)+'%';
-        document.getElementById('doneb').style.display='none';rtUI();
+        document.getElementById('doneb').style.display=(cntD()>0&&cntD()===cntT())?'block':'none';
+        rtUI();
     }
     function updP(){
         document.getElementById('ps').textContent=S.sess.length;
@@ -402,21 +551,21 @@ var toggleKids, setLvl, newR, startR, complete, toggleTimer, resetTimer, tc, tdd
         if(card){card.querySelector('.ex-check').classList.toggle('done',!!S.done[key]);}
         document.getElementById('dn').textContent=cntD();
         document.getElementById('progf').style.width=(cntT()>0?cntD()/cntT()*100:0)+'%';
+        document.getElementById('doneb').style.display=(cntD()>0&&cntD()===cntT())?'block':'none';
     };
 
     // ===== TIMER =====
-    function rtUI(){S.sec=1200;S.run=false;if(S.tid){clearInterval(S.tid);S.tid=null;}document.getElementById('timer').querySelector('.tnum').textContent='20:00';document.getElementById('timer').classList.remove('running','done');document.getElementById('tbtn').textContent='▶ Iniciar';document.getElementById('doneb').style.display='none';}
+    function rtUI(){S.sec=1200;S.run=false;if(S.tid){clearInterval(S.tid);S.tid=null;}document.getElementById('timer').querySelector('.tnum').textContent='20:00';document.getElementById('timer').classList.remove('running','done');document.getElementById('tbtn').textContent='▶ Iniciar';}
     toggleTimer = function(){
         if(S.run){S.run=false;if(S.tid){clearInterval(S.tid);S.tid=null;}document.getElementById('tbtn').textContent='▶ Reanudar';document.getElementById('timer').classList.remove('running');}
         else{S.run=true;document.getElementById('tbtn').textContent='⏸ Pausar';document.getElementById('timer').classList.add('running');S.tid=setInterval(function(){if(S.sec<=0){clearInterval(S.tid);S.tid=null;S.run=false;document.getElementById('timer').querySelector('.tnum').textContent='¡Listo!';document.getElementById('timer').classList.remove('running');document.getElementById('timer').classList.add('done');document.getElementById('tbtn').textContent='▶ Iniciar';document.getElementById('doneb').style.display='block';document.getElementById('doneb').scrollIntoView({behavior:'smooth'});if(navigator.vibrate)navigator.vibrate([200,100,200]);}else{S.sec--;var m=String(Math.floor(S.sec/60)).padStart(2,'0'),s=String(S.sec%60).padStart(2,'0');document.getElementById('timer').querySelector('.tnum').textContent=m+':'+s;}},1000);}
     };
-    resetTimer = function(){if(S.tid){clearInterval(S.tid);S.tid=null;}S.run=false;S.sec=1200;document.getElementById('timer').querySelector('.tnum').textContent='20:00';document.getElementById('timer').classList.remove('running','done');document.getElementById('tbtn').textContent='▶ Iniciar';document.getElementById('doneb').style.display='none';};
+    resetTimer = function(){if(S.tid){clearInterval(S.tid);S.tid=null;}S.run=false;S.sec=1200;document.getElementById('timer').querySelector('.tnum').textContent='20:00';document.getElementById('timer').classList.remove('running','done');document.getElementById('tbtn').textContent='▶ Iniciar';};
 
-    // ===== COMPLETE / KIDS / LEVEL / NEW / PLAN =====
+    // ===== COMPLETE / KIDS / LEVEL / PLAN =====
     complete = function(){var t=td();if(!S.sess.includes(t)){S.sess.push(t);S.sess.sort();sv('s',S.sess);}S.done={};confetti();updAll();document.getElementById('doneb').style.display='none';rtUI();setTimeout(function(){navTo('screen-home');},1200);};
     toggleKids = function(){S.kids=!S.kids;sv('k',S.kids);document.getElementById('kidstg').classList.toggle('on',S.kids);S.done={};updR();};
     setLvl = function(lvl,el){S.lvl=lvl;sv('l',lvl);document.querySelectorAll('#chips .chip').forEach(function(c){c.classList.remove('active');});if(el)el.classList.add('active');S.done={};updR();};
-    newR = function(){S.done={};rtUI();updR();document.getElementById('exb').scrollIntoView({behavior:'smooth'});};
     startR = function(){S.done={};navTo('screen-routine');rtUI();updR();};
     selP = function(p){S.plan=p;updPl();};
     confirmP = function(){sv('p',S.plan);updAll();confetti();setTimeout(function(){navTo('screen-home');},500);};
